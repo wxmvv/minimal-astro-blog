@@ -1,0 +1,55 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import { projects } from '@data/config/projects';
+import { pageMetadata } from '@data/config/site';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Nav from '@/components/Nav.astro';
+import SiteTitle from '@/components/SiteTitle.astro';
+
+const images = import.meta.glob<ImageMetadata>(
+  '/data/assets/**/*.{png,jpg,jpeg,webp,avif,gif,svg}',
+  {
+    eager: true,
+    import: 'default',
+  },
+);
+
+function getProjectImage(path: string): ImageMetadata {
+  // Resolve paths relative to data/config/projects.ts.
+  const image = images[path.replace(/^\.\.\//, '/data/')];
+  if (!image) throw new Error(`Project image not found: ${path}`);
+  return image;
+}
+---
+
+<BaseLayout meta={pageMetadata.projects}>
+  <SiteTitle />
+  <Nav />
+  <main>
+    <ul class="section-g6 grid gap-6 md:grid-cols-2 md:-mx-24">
+      {
+        projects.map((project) => (
+          <li class="section-g2" data-motion-item>
+            {project.image && (
+              <div class="flex flex-row justify-center bg-zinc-100 rounded-sm aspect-square">
+                <Image
+                  src={getProjectImage(project.image)}
+                  alt={project.title}
+                  class="object-contain"
+                  loading="lazy"
+                />
+              </div>
+            )}
+            <article>
+              <h2>{project.href ? <a href={project.href}>{project.title}</a> : project.title}</h2>
+              {project.year && <p class="text-zz">{project.year}</p>}
+              {project.tag && <p class="text-zz">{project.tag}</p>}
+              <p class="text-zz">{project.description}</p>
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+</BaseLayout>

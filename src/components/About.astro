@@ -1,0 +1,42 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { PageMeta } from '@data/config/site';
+
+interface Props {
+  content: CollectionEntry<'about'>['data'];
+  title: string;
+  meta?: PageMeta;
+}
+
+const { content, title, meta } = Astro.props;
+const { email, twitter, linkedin, github } = content;
+
+const links = [
+  email && { label: 'Email', href: `mailto:${email}` },
+  twitter && { label: 'Twitter', href: twitter },
+  linkedin && { label: 'LinkedIn', href: linkedin },
+  github && { label: 'GitHub', href: github },
+].filter((link): link is { label: string; href: string } => Boolean(link));
+---
+
+<main>
+  <article class="section-g12">
+    <div class="prose" data-motion-item>
+      <slot />
+    </div>
+    {
+      links.length > 0 && (
+        <section class="section-g4" id="connect" data-motion-item>
+          <h2 class="text-zz">Connect</h2>
+          <div class="section-g4">
+            {links.map(({ label, href }) => (
+              <a href={href} target="_blank" rel="noopener noreferrer">
+                {label}
+              </a>
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </article>
+</main>

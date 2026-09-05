@@ -1,0 +1,37 @@
+---
+import { ClientRouter } from 'astro:transitions';
+---
+
+<ClientRouter fallback="swap" />
+
+<script is:inline>
+  // Hide only when JavaScript is available; recover if the animation bundle fails to load.
+  document.documentElement.dataset.pageMotion = 'pending';
+  window.setTimeout(() => {
+    if (document.documentElement.dataset.pageMotion === 'pending') {
+      delete document.documentElement.dataset.pageMotion;
+    }
+  }, 2500);
+</script>
+
+<script>
+  import '@/scripts/page-transitions';
+</script>
+
+<style is:global>
+  html[data-page-motion='pending'] #main-container {
+    opacity: 0;
+  }
+
+  /* GSAP owns the transition; do not layer browser snapshot fades on top. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html[data-page-motion='pending'] #main-container {
+      opacity: 1;
+    }
+  }
+</style>

@@ -1,0 +1,32 @@
+---
+import { navigationLinks } from '@data/config/navigation';
+import { siteMetadata } from '@data/config/site';
+import RssButton from '@/components/RssButton.astro';
+
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+const isCurrentTab = (href: string) =>
+  href === '/' ? currentPath === href : currentPath === href || currentPath.startsWith(`${href}/`);
+---
+
+<nav class="flex gap-6" aria-label="Primary navigation" data-motion-item>
+  {
+    navigationLinks.map(({ href, label }) => {
+      const isActive = isCurrentTab(href);
+
+      return (
+        <a
+          href={href}
+          aria-current={isActive ? 'page' : undefined}
+          class="relative shrink-0 pb-1 text-zinc-400 no-underline! hover:no-underline!"
+        >
+          {label}
+          {isActive && (
+            <span data-nav-indicator class="absolute inset-x-0 -bottom-px h-0.5 bg-zinc-200" />
+          )}
+        </a>
+      );
+    })
+  }
+  {siteMetadata.rssPath && <RssButton />}
+</nav>

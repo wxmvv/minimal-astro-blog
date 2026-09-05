@@ -1,0 +1,28 @@
+---
+import { getEntry, render } from 'astro:content';
+import { pageMetadata } from '@data/config/site';
+import About from '@/components/About.astro';
+import Nav from '@/components/Nav.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SiteTitle from '@/components/SiteTitle.astro';
+
+const author = await getEntry('about', 'about');
+
+if (!author) {
+  throw new Error('Missing the single-author About entry: data/about/about.md');
+}
+
+const { Content } = await render(author);
+---
+
+<BaseLayout meta={pageMetadata.about}>
+  <SiteTitle />
+  <Nav />
+  <About
+    content={author.data}
+    title={pageMetadata.about.title ?? 'About'}
+    meta={pageMetadata.about}
+  >
+    <Content />
+  </About>
+</BaseLayout>

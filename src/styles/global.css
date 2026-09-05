@@ -1,0 +1,191 @@
+@import 'tailwind.css';
+@import 'liquid_glass.css';
+
+:root {
+  --accent: #2337ff;
+  --accent-dark: #000d8a;
+  --black: 15, 18, 25;
+  --gray: 96, 115, 159;
+  --gray-light: 229, 233, 240;
+  --gray-dark: 34, 41, 57;
+  --gray-gradient: rgba(var(--gray-light), 50%), #fff;
+  --box-shadow:
+    0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%),
+    0 16px 32px rgba(var(--gray), 33%);
+}
+
+@utility text-global-base {
+  font-size: 15px;
+}
+@utility section-g0 {
+  @apply flex flex-col gap-0;
+}
+@utility section-g1 {
+  @apply flex flex-col gap-1;
+}
+@utility section-g2 {
+  @apply flex flex-col gap-2;
+}
+@utility section-g4 {
+  @apply flex flex-col gap-4;
+}
+@utility section-g6 {
+  @apply flex flex-col gap-6;
+}
+@utility section-g8 {
+  @apply flex flex-col gap-8;
+}
+@utility section-g12 {
+  @apply flex flex-col gap-12;
+}
+@utility bg-zinc-150 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(238 239 242 / var(--tw-bg-opacity, 1));
+}
+@utility text-bw {
+  @apply text-black dark:text-white;
+}
+@utility text-zz {
+  @apply text-zinc-400 dark:text-zinc-500;
+}
+
+body {
+  @apply bg-white text-black dark:bg-gray-950 dark:text-white;
+  @apply m-0 p-0;
+  @apply text-global-base;
+  @apply md:flex md:flex-row md:justify-center;
+
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    sans-serif,
+    Apple Color Emoji,
+    Segoe UI Emoji,
+    Segoe UI Symbol,
+    Noto Color Emoji;
+  text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+#body-container {
+  @apply md:w-full md:min-w-lg md:max-w-2xl min-h-dvh;
+  @apply flex flex-col justify-start max-w-2xl px-8 py-24;
+  @apply section-g0;
+}
+
+#main-container {
+  @apply section-g12 grow;
+}
+
+main {
+  @apply grow;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply m-0;
+}
+h1 {
+  @apply font-medium;
+  @apply text-base;
+}
+h2 {
+  @apply font-normal;
+  @apply text-base;
+}
+h3 {
+  @apply font-light;
+  @apply text-base;
+}
+h4 {
+  @apply font-extralight;
+  @apply text-base;
+}
+h5 {
+  @apply font-extralight;
+  @apply text-base;
+}
+
+strong,
+b {
+  font-weight: 700;
+}
+
+a {
+  @apply underline relative inline-block transition-colors duration-300 will-change-transform underline-offset-2;
+  text-decoration-color: #eeeff2;
+  text-decoration-thickness: 2px;
+}
+
+a:hover {
+  text-decoration-color: #d4d4d8;
+  transition-property: all;
+  transition-duration: 0.2s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* markdown */
+.prose {
+  @apply section-g8;
+}
+
+textarea {
+  width: 100%;
+  font-size: 16px;
+}
+input {
+  font-size: 16px;
+}
+table {
+  width: 100%;
+}
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+code {
+  padding: 2px 5px;
+  background-color: rgb(var(--gray-light));
+  border-radius: 2px;
+}
+pre {
+  padding: 1.5em;
+  border-radius: 8px;
+}
+pre > code {
+  all: unset;
+}
+blockquote {
+  border-left: 4px solid var(--accent);
+  padding: 0 0 0 20px;
+  margin: 0;
+  font-size: 1.333em;
+}
+hr {
+  border: none;
+  border-top: 1px solid rgb(var(--gray-light));
+}
+
+.sr-only {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  position: absolute !important;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  /* IE6, IE7 - a 0 height clip, off to the bottom right of the visible 1px box */
+  clip: rect(1px 1px 1px 1px);
+  /* maybe deprecated but we need to support legacy browsers */
+  clip: rect(1px, 1px, 1px, 1px);
+  /* modern browsers, clip-path works inwards from each corner */
+  clip-path: inset(50%);
+  /* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
+  white-space: nowrap;
+}

@@ -1,0 +1,10 @@
+---
+import { siteMetadata } from '@data/config/site';
+
+const today = new Date();
+---
+
+<footer class="bg-transparent text-gray-500/5 dark:text-gray-100/5 text-end pt-10">
+  &copy; {today.getFullYear()}
+  {siteMetadata.author}. All rights reserved.
+</footer>

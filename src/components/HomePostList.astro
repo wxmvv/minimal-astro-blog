@@ -1,0 +1,450 @@
+---
+import { posix } from 'node:path';
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+}
+
+const { posts } = Astro.props;
+const videos = import.meta.glob<string>('/data/**/*.{mp4,webm,ogg,MP4,WEBM,OGG}', {
+  query: '?url',
+  import: 'default',
+});
+const previews = await Promise.all(
+  posts.map(async (post) => {
+    const media = post.data.homepageMedia;
+    if (typeof media !== 'string') return media;
+
+    const path = posix.join('/', posix.dirname(post.filePath ?? ''), media);
+    const loadVideo = videos[path];
+    if (!loadVideo) {
+      throw new Error(`Cannot find homepageMedia video "${media}" for "${post.id}".`);
+    }
+    return loadVideo();
+  }),
+);
+---
+
+<home-post-list>
+  <div class="hover-background" aria-hidden="true">
+    <div class="liquid_glass-wrapper hover-glass">
+      <div class="liquid_glass-outer"></div>
+      <div class="liquid_glass-cover"></div>
+      <div class="liquid_glass-sharp"></div>
+      <div class="liquid_glass-reflect"></div>
+    </div>
+  </div>
+  <svg class="glass-filter" aria-hidden="true" width="0" height="0">
+    <defs>
+      <filter id="liquid_glass_filter" x="0%" y="0%" width="100%" height="100%">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.015 0.02"
+          numOctaves="2"
+          seed="10"
+          result="glass-noise"></feTurbulence>
+        <!-- Use an independent map and limit refraction to ±4px instead of shifting the backdrop. -->
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="glass-noise"
+          scale="50"
+          xChannelSelector="R"
+          yChannelSelector="G"></feDisplacementMap>
+      </filter>
+    </defs>
+  </svg>
+
+  <ul class="post-list flex flex-col gap-2">
+    {
+      posts.map(({ id, data: { title, pubDate, tags } }, index) => (
+        <li class="w-fit max-w-full" data-motion-item>
+          <article>
+            <a
+              href={`/blog/${id}/`}
+              data-post-index={index}
+              class="post-link group no-underline! rounded-lg text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 dark:text-gray-100"
+            >
+              <div class="post-content flex flex-col gap-1">
+                <h2 class="group-hover:underline">{title}</h2>
+                <span class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-zinc-400">
+                  <time datetime={pubDate.toISOString()}>{pubDate.getUTCFullYear()}</time>
+                  {tags.length > 0 && (
+                    <span class="flex flex-wrap gap-x-1 font-medium">
+                      {tags.map((tag) => (
+                        <span>{tag.split(' ').join('-')}</span>
+                      ))}
+                    </span>
+                  )}
+                </span>
+              </div>
+            </a>
+          </article>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="previews" aria-hidden="true">
+    {
+      previews.map((media, index) =>
+        media ? (
+          <div class="preview" data-preview-index={index}>
+            {typeof media === 'string' ? (
+              <video src={media} muted loop playsinline preload="metadata" />
+            ) : (
+              <Image src={media} alt="" widths={[484, 968]} sizes="484px" loading="eager" />
+            )}
+          </div>
+        ) : null,
+      )
+    }
+  </div>
+</home-post-list>
+
+<script>
+  class HomePostList extends HTMLElement {
+    private cleanup?: () => void;
+
+    connectedCallback() {
+      this.cleanup?.();
+      const background = this.querySelector<HTMLElement>('.hover-background')!;
+      const glass = this.querySelector<HTMLElement>('.hover-glass')!;
+      const previewLayer = this.querySelector<HTMLElement>('.previews')!;
+      const links = [...this.querySelectorAll<HTMLAnchorElement>('[data-post-index]')];
+      const previews = [...this.querySelectorAll<HTMLElement>('[data-preview-index]')];
+      // GSAP transforms/filters establish a containing block for fixed descendants.
+      // Keep previews outside the animated ancestors so their viewport position stays stable.
+      document.body.append(previewLayer);
+      const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+      const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
+      const events = new AbortController();
+      const { signal } = events;
+      let active: HTMLAnchorElement | null = null;
+      let hovered: HTMLAnchorElement | null = null;
+      let focused: HTMLAnchorElement | null = null;
+      let hideTimer: ReturnType<typeof setTimeout> | undefined;
+      let frame = 0;
+      let previousTime = 0;
+      const current = { x: 0, y: 0 };
+      const target = { x: 0, y: 0 };
+
+      const drawOffset = () => {
+        glass.style.transform = `translate(${current.x * 4}px, ${current.y * 4}px)`;
+        const content = active?.querySelector<HTMLElement>('.post-content');
+        if (content) content.style.transform = `translate(${current.x}px, ${current.y}px)`;
+      };
+
+      // Same 0.14 easing as Main.tsx, time-adjusted for high-refresh displays.
+      // Stop requesting frames once settled instead of running an idle animation loop.
+      const tick = (time: number) => {
+        const elapsed = previousTime ? Math.min(time - previousTime, 64) : 1000 / 60;
+        previousTime = time;
+        const ease = 1 - Math.pow(1 - 0.14, elapsed / (1000 / 60));
+        current.x += (target.x - current.x) * ease;
+        current.y += (target.y - current.y) * ease;
+        const settled = Math.abs(target.x - current.x) + Math.abs(target.y - current.y) < 0.001;
+        if (settled) Object.assign(current, target);
+        drawOffset();
+        frame = settled ? 0 : requestAnimationFrame(tick);
+      };
+
+      const moveOffset = (x = 0, y = 0) => {
+        target.x = reducedMotion.matches ? 0 : x;
+        target.y = reducedMotion.matches ? 0 : y;
+        if (reducedMotion.matches) {
+          cancelAnimationFrame(frame);
+          frame = 0;
+          Object.assign(current, target);
+          drawOffset();
+        } else if (!frame) {
+          previousTime = 0;
+          frame = requestAnimationFrame(tick);
+        }
+      };
+
+      const syncPreviews = () => {
+        for (const preview of previews) {
+          const visible = preview.dataset.previewIndex === active?.dataset.postIndex;
+          preview.classList.toggle('is-active', visible);
+          const video = preview.querySelector('video');
+          if (!video) continue;
+          if (visible && !reducedMotion.matches && !document.hidden) {
+            video.muted = true;
+            void video.play().catch(() => {
+              // Autoplay may be blocked by browser preferences; keep the preview still.
+            });
+          } else {
+            video.pause();
+          }
+        }
+      };
+
+      const measure = () => {
+        const bounds = this.getBoundingClientRect();
+        const margin = Math.min(16, innerWidth / 4);
+        const preferredLeft = bounds.right + 48;
+        // Keep a usable preview on narrow screens, shifting it inward instead of hiding it.
+        const width = Math.min(
+          484,
+          innerWidth - margin * 2,
+          Math.max(180, innerWidth - preferredLeft - 32),
+        );
+        const left = Math.max(margin, Math.min(preferredLeft, innerWidth - width - margin));
+        previewLayer.style.setProperty('--preview-left', `${left}px`);
+        previewLayer.style.setProperty('--preview-width', `${Math.max(300, width)}px`);
+
+        if (active) {
+          // Measure the stationary link, not its translated content, to avoid feedback/jitter.
+          const rect = active.getBoundingClientRect();
+          Object.assign(background.style, {
+            left: `${rect.left - bounds.left}px`,
+            top: `${rect.top - bounds.top}px`,
+            width: `${rect.width}px`,
+            height: `${rect.height}px`,
+          });
+        }
+        syncPreviews();
+      };
+
+      const activate = (link: HTMLAnchorElement) => {
+        clearTimeout(hideTimer);
+        if (active !== link) {
+          const oldContent = active?.querySelector<HTMLElement>('.post-content');
+          if (oldContent) oldContent.style.transform = '';
+          active = link;
+          moveOffset();
+        }
+        this.dataset.activeIndex = link.dataset.postIndex;
+        measure();
+        background.classList.add('is-active');
+      };
+
+      const hide = () => {
+        clearTimeout(hideTimer);
+        const content = active?.querySelector<HTMLElement>('.post-content');
+        if (content) content.style.transform = '';
+        active = null;
+        delete this.dataset.activeIndex;
+        background.classList.remove('is-active');
+        moveOffset();
+        syncPreviews();
+      };
+
+      const leave = () => {
+        moveOffset();
+        const remaining = hovered ?? focused;
+        if (remaining) activate(remaining);
+        else {
+          clearTimeout(hideTimer);
+          hideTimer = setTimeout(hide, reducedMotion.matches ? 0 : 1500);
+        }
+      };
+
+      for (const link of links) {
+        link.addEventListener(
+          'pointerenter',
+          (event) => {
+            if (!finePointer.matches || event.pointerType === 'touch') return;
+            hovered = link;
+            activate(link);
+          },
+          { signal },
+        );
+        link.addEventListener(
+          'pointermove',
+          (event) => {
+            if (hovered !== link || event.pointerType === 'touch') return;
+            const rect = link.getBoundingClientRect();
+            const clamp = (value: number) => Math.max(-1, Math.min(1, value));
+            moveOffset(
+              clamp(((event.clientX - rect.left) / rect.width - 0.5) * 2),
+              clamp(((event.clientY - rect.top) / rect.height - 0.5) * 2),
+            );
+          },
+          { signal },
+        );
+        const pointerLeave = () => {
+          if (hovered !== link) return;
+          hovered = null;
+          leave();
+        };
+        link.addEventListener('pointerleave', pointerLeave, { signal });
+        link.addEventListener('pointercancel', pointerLeave, { signal });
+        link.addEventListener(
+          'focus',
+          () => {
+            if (!link.matches(':focus-visible')) return;
+            focused = link;
+            activate(link);
+          },
+          { signal },
+        );
+        link.addEventListener(
+          'blur',
+          () => {
+            if (focused !== link) return;
+            focused = null;
+            leave();
+          },
+          { signal },
+        );
+      }
+
+      const reset = () => {
+        hovered = focused = null;
+        hide();
+      };
+      window.addEventListener('resize', measure, { signal });
+      document.addEventListener('site:motion-start', reset, { signal });
+      document.addEventListener('site:motion-complete', measure, { signal });
+      window.addEventListener('blur', reset, { signal });
+      document.addEventListener(
+        'visibilitychange',
+        () => {
+          if (document.hidden) reset();
+        },
+        { signal },
+      );
+      reducedMotion.addEventListener(
+        'change',
+        () => {
+          moveOffset();
+          syncPreviews();
+        },
+        { signal },
+      );
+      finePointer.addEventListener('change', reset, { signal });
+      const observer = new ResizeObserver(measure);
+      observer.observe(this);
+      for (const link of links) observer.observe(link);
+      measure();
+
+      this.cleanup = () => {
+        events.abort();
+        observer.disconnect();
+        hide();
+        cancelAnimationFrame(frame);
+        // Restore ownership for removal during navigation and for a later reconnection.
+        this.append(previewLayer);
+      };
+    }
+
+    disconnectedCallback() {
+      this.cleanup?.();
+    }
+  }
+
+  if (!customElements.get('home-post-list')) customElements.define('home-post-list', HomePostList);
+</script>
+
+<style>
+  home-post-list {
+    position: relative;
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    isolation: isolate;
+  }
+
+  .glass-filter {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .post-list {
+    position: relative;
+    z-index: 1;
+  }
+
+  .post-link {
+    display: block;
+    margin-inline: -18px;
+    padding: 8px 18px;
+    transition: none;
+  }
+
+  .hover-background {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0;
+    border-radius: 16px;
+    transition:
+      opacity 0.9s ease,
+      top 0.33s ease,
+      left 0.6s ease,
+      width 0.3s ease,
+      height 0.3s ease;
+  }
+
+  .hover-background.is-active {
+    opacity: 1;
+    transition-duration: 0.5s, 0.33s, 0.6s, 0.3s, 0.3s;
+  }
+
+  .hover-glass {
+    width: 100%;
+    height: 100%;
+  }
+
+  .previews {
+    position: fixed;
+    z-index: -1;
+    top: 50%;
+    left: var(--preview-left, 100vw);
+    width: var(--preview-width, 0px);
+    pointer-events: none;
+  }
+
+  .preview {
+    position: absolute;
+    inset-inline: 0;
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    filter: blur(16px);
+    transform: translateY(calc(-50% + 16px));
+    transition:
+      opacity 0.3s ease,
+      filter 0.3s ease,
+      transform 0.3s ease,
+      visibility 0.3s;
+  }
+
+  .preview.is-active {
+    opacity: 1;
+    visibility: visible;
+    filter: blur(0);
+    transform: translateY(-50%);
+  }
+
+  .preview :is(img, video) {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: min(484px, 80dvh);
+    border-radius: 10px;
+    object-fit: contain;
+  }
+
+  @media (max-width: 390px) {
+    .previews {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hover-background,
+    .preview {
+      transition: none;
+    }
+
+    .preview {
+      filter: none;
+      transform: translateY(-50%);
+    }
+  }
+</style>

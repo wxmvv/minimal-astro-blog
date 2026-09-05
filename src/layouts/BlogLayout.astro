@@ -1,0 +1,33 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { PageMeta } from '@data/config/site';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+interface Props {
+  content: CollectionEntry<'blog'>['data'];
+  title: string;
+  meta?: PageMeta;
+}
+
+const { content, title, meta } = Astro.props;
+const { pubDate, heroImage, updatedDate, description } = content;
+---
+
+<BaseLayout meta={meta}>
+  <main>
+    <article class="section-g12">
+      <!-- <header>
+        <h1>{title}</h1>
+        {avatar && <img src={avatar} alt={name} width="160" height="160" />}
+        <p>{name}</p>
+        {role && <p>{role}</p>}
+      </header> -->
+
+      <div class="prose">
+        <slot />
+      </div>
+
+      <slot name="extra" />
+    </article>
+  </main>
+</BaseLayout>

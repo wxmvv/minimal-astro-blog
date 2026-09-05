@@ -1,0 +1,16 @@
+---
+import { navigationLinks } from '@data/config/navigation';
+import { siteMetadata } from '@data/config/site';
+---
+
+<header class="flex items-center justify-between" data-site-header transition:persist="site-header">
+  <div class="mb-8 flex flex-row gap-4">
+    <a href="/" aria-label={siteMetadata.title}>
+      <div class="flex items-center justify-between">
+        <div class="group grid h-8 w-8">
+          <img src="/avatar.png" alt="描述图片" width={40} height={40} />
+        </div>
+      </div>
+    </a>
+  </div>
+</header>

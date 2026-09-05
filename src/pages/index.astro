@@ -1,0 +1,22 @@
+---
+import { getCollection } from 'astro:content';
+import { pageMetadata } from '@data/config/site';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Nav from '@/components/Nav.astro';
+import SiteTitle from '@/components/SiteTitle.astro';
+import HomePostList from '@/components/HomePostList.astro';
+
+const MAX_DISPLAY = 8;
+const posts = (await getCollection('blog', ({ data }) => data.homepage === true))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, MAX_DISPLAY);
+---
+
+<BaseLayout meta={pageMetadata.home}>
+  <SiteTitle />
+  <Nav />
+  <main>
+    <h1 class="sr-only">首页文章</h1>
+    {posts.length > 0 ? <HomePostList posts={posts} /> : <p class="text-zz">暂无首页文章</p>}
+  </main>
+</BaseLayout>
