@@ -33,12 +33,22 @@ function getProjectImage(path: string): ImageMetadata {
           <li class="section-g2" data-motion-item>
             {project.image && (
               <div class="flex flex-row justify-center bg-zinc-100 rounded-sm aspect-square">
-                <Image
-                  src={getProjectImage(project.image)}
-                  alt={project.title}
-                  class="object-contain"
-                  loading="lazy"
-                />
+                {/^https?:\/\//i.test(project.image) ? (
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    class="object-contain w-full h-full"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <Image
+                    src={getProjectImage(project.image)}
+                    alt={project.title}
+                    class="object-contain"
+                    loading="lazy"
+                  />
+                )}
               </div>
             )}
             <article>

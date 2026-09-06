@@ -2,7 +2,7 @@ export interface Project {
   title: string;
   description: string;
   href?: string;
-  /** Local image path relative to this config file, e.g. '../assets/google.png'. */
+  /** HTTP(S) URL or local image path relative to this file, e.g. '../assets/google.png'. */
   image?: string;
   tag?: string;
   year?: string;
