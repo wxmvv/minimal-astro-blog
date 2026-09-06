@@ -8,8 +8,14 @@ const blog = defineCollection({
     z.object({
       title: z.string(),
       pubDate: z.coerce.date(),
-      updatedDate: z.coerce.date().optional(),
-      description: z.string().nullish().transform((value) => value ?? undefined),
+      updatedDate: z.preprocess(
+        (value) => (value === null || value === '' ? undefined : value),
+        z.coerce.date().optional(),
+      ),
+      description: z
+        .string()
+        .nullish()
+        .transform((value) => value ?? undefined),
       comments: z.boolean().default(true),
       authors: z.array(z.string()).default(['default']),
       heroImage: z.optional(image()),
@@ -22,7 +28,7 @@ const blog = defineCollection({
       homepageMedia: z
         .union([z.string().regex(/^\.{1,2}\/.*\.(mp4|webm|ogg)$/i), image()])
         .optional(),
-    }), 
+    }),
 });
 
 const about = defineCollection({
