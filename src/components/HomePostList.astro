@@ -137,7 +137,7 @@ const previews = await Promise.all(
       };
 
       // Same 0.14 easing as Main.tsx, time-adjusted for high-refresh displays.
-      // Stop requesting frames once settled instead of running an idle animation loop.
+      // Keep tracking the link during entry, even after the pointer offset settles.
       const tick = (time: number) => {
         const elapsed = previousTime ? Math.min(time - previousTime, 64) : 1000 / 60;
         previousTime = time;
@@ -147,7 +147,8 @@ const previews = await Promise.all(
         const settled = Math.abs(target.x - current.x) + Math.abs(target.y - current.y) < 0.001;
         if (settled) Object.assign(current, target);
         drawOffset();
-        frame = settled ? 0 : requestAnimationFrame(tick);
+        measureBackground();
+        frame = settled && !isTrackingMotion() ? 0 : requestAnimationFrame(tick);
       };
 
       const moveOffset = (x = 0, y = 0) => {
@@ -181,6 +182,23 @@ const previews = await Promise.all(
         }
       };
 
+      const isTrackingMotion = () =>
+        active !== null && document.documentElement.dataset.pageMotion === 'entering';
+
+      const measureBackground = () => {
+        background.classList.toggle('is-tracking-motion', isTrackingMotion());
+        if (!active) return;
+        // The link's ancestor moves during entry; its content has a separate pointer offset.
+        const bounds = this.getBoundingClientRect();
+        const rect = active.getBoundingClientRect();
+        Object.assign(background.style, {
+          left: `${rect.left - bounds.left}px`,
+          top: `${rect.top - bounds.top}px`,
+          width: `${rect.width}px`,
+          height: `${rect.height}px`,
+        });
+      };
+
       const measure = () => {
         const bounds = this.getBoundingClientRect();
         const margin = Math.min(16, innerWidth / 4);
@@ -195,16 +213,7 @@ const previews = await Promise.all(
         previewLayer.style.setProperty('--preview-left', `${left}px`);
         previewLayer.style.setProperty('--preview-width', `${Math.max(300, width)}px`);
 
-        if (active) {
-          // Measure the stationary link, not its translated content, to avoid feedback/jitter.
-          const rect = active.getBoundingClientRect();
-          Object.assign(background.style, {
-            left: `${rect.left - bounds.left}px`,
-            top: `${rect.top - bounds.top}px`,
-            width: `${rect.width}px`,
-            height: `${rect.height}px`,
-          });
-        }
+        measureBackground();
         syncPreviews();
       };
 
@@ -383,6 +392,10 @@ const previews = await Promise.all(
     transition-duration: 0.5s, 0.33s, 0.6s, 0.3s, 0.3s;
   }
 
+  .hover-background.is-tracking-motion {
+    transition-property: opacity;
+  }
+
   .hover-glass {
     width: 100%;
     height: 100%;
@@ -392,7 +405,8 @@ const previews = await Promise.all(
     position: fixed;
     z-index: -1;
     top: 50%;
-    left: var(--preview-left, 100vw);
+    /*left: var(--preview-left, 50%);*/
+    left: 55%;
     width: var(--preview-width, 0px);
     pointer-events: none;
   }
