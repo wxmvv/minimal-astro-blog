@@ -22,7 +22,7 @@ const blog = defineCollection({
       homepageMedia: z
         .union([z.string().regex(/^\.{1,2}\/.*\.(mp4|webm|ogg)$/i), image()])
         .optional(),
-    }),
+    }), 
 });
 
 const about = defineCollection({

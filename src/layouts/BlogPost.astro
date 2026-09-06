@@ -4,16 +4,17 @@ import type { CollectionEntry } from 'astro:content';
 import type { PageMeta } from '@data/config/site';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import FormattedDate from '@/components/FormattedDate.astro';
+import Comments from '@/components/Comments.astro';
 
 type Props = CollectionEntry<'blog'>['data'] & {
   meta?: PageMeta;
 };
 
-const { title, description, pubDate, updatedDate, heroImage, meta } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, meta, comments = true } = Astro.props;
 const resolvedMeta: PageMeta = meta ?? {
   title,
   description,
-  image: heroImage,
+  image: heroImage?.src,
   type: 'article',
   publishedTime: pubDate,
   updatedTime: updatedDate,
@@ -85,5 +86,6 @@ const resolvedMeta: PageMeta = meta ?? {
         <slot />
       </div>
     </article>
+    {comments && <Comments />}
   </main>
 </BaseLayout>

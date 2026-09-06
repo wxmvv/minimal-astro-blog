@@ -1,0 +1,88 @@
+---
+import { siteMetadata } from '@data/config/site';
+
+const { provider, giscusConfig } = siteMetadata.comments;
+---
+
+{
+  provider === 'giscus' && (
+    <section id="comments" aria-label="评论">
+      <blog-comments data-config={JSON.stringify(giscusConfig)} />
+    </section>
+  )
+}
+
+<script>
+  class BlogComments extends HTMLElement {
+    private colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    private config!: {
+      repo: string;
+      repositoryId: string;
+      category: string;
+      categoryId: string;
+      mapping: string;
+      reactions: string;
+      metadata: string;
+      theme: string;
+      darkTheme: string;
+      themeURL: string;
+      lang?: string;
+    };
+
+    private getTheme() {
+      const theme = this.colorScheme.matches ? this.config.darkTheme : this.config.theme;
+      return theme === 'custom' ? this.config.themeURL : theme;
+    }
+
+    private updateTheme = () => {
+      this.querySelector<HTMLIFrameElement>('iframe.giscus-frame')?.contentWindow?.postMessage(
+        { giscus: { setConfig: { theme: this.getTheme() } } },
+        'https://giscus.app',
+      );
+    };
+
+    connectedCallback() {
+      this.config = JSON.parse(this.dataset.config!);
+      const script = document.createElement('script');
+      script.src = 'https://giscus.app/client.js';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      Object.assign(script.dataset, {
+        repo: this.config.repo,
+        repoId: this.config.repositoryId,
+        category: this.config.category,
+        categoryId: this.config.categoryId,
+        mapping: this.config.mapping,
+        reactionsEnabled: this.config.reactions,
+        emitMetadata: this.config.metadata,
+        inputPosition: 'top',
+        theme: this.getTheme(),
+        lang: this.config.lang ?? 'en',
+        loading: 'lazy',
+      });
+      this.replaceChildren(script);
+      this.colorScheme.addEventListener('change', this.updateTheme);
+    }
+
+    disconnectedCallback() {
+      this.colorScheme.removeEventListener('change', this.updateTheme);
+    }
+  }
+
+  if (!customElements.get('blog-comments')) {
+    customElements.define('blog-comments', BlogComments);
+  }
+</script>
+
+<style>
+  section {
+    width: 720px;
+    max-width: calc(100% - 2em);
+    margin: 2em auto 0;
+    padding: 1em;
+  }
+
+  blog-comments {
+    display: block;
+  }
+</style>

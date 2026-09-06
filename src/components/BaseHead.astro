@@ -14,7 +14,7 @@ const canonicalURL = new URL(meta.canonical ?? Astro.url.pathname, siteURL);
 const title = meta.title ? `${meta.title} | ${siteMetadata.title}` : siteMetadata.title;
 const description = meta.description ?? siteMetadata.description;
 const image = meta.image ?? FallbackImage;
-const imagePath = typeof image === 'string' ? image : image.src;
+const imagePath = typeof image === 'string' || image instanceof URL ? image : image.src;
 const imageURL = new URL(imagePath, siteURL);
 ---
 
