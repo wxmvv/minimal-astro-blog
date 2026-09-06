@@ -15,8 +15,7 @@ const title = meta.title ? `${meta.title} | ${siteMetadata.title}` : siteMetadat
 const description = meta.description ?? siteMetadata.description;
 // const image = meta.image ?? FallbackImage;
 const image = meta.image;
-const imagePath = typeof image === 'string' || image instanceof URL ? image : image.src;
-const imageURL = new URL(imagePath, siteURL);
+const imageURL = image ? new URL(image, siteURL) : undefined;
 ---
 
 <!-- Global Metadata -->
@@ -51,7 +50,7 @@ const imageURL = new URL(imagePath, siteURL);
 <meta property="og:url" content={canonicalURL} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
-<meta property="og:image" content={imageURL} />
+{imageURL && <meta property="og:image" content={imageURL} />}
 <meta property="og:locale" content={siteMetadata.locale.replace('-', '_')} />
 <meta property="og:site_name" content={siteMetadata.title} />
 {
@@ -66,7 +65,7 @@ const imageURL = new URL(imagePath, siteURL);
 }
 
 <!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:card" content={imageURL ? 'summary_large_image' : 'summary'} />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
-<meta name="twitter:image" content={imageURL} />
+{imageURL && <meta name="twitter:image" content={imageURL} />}
