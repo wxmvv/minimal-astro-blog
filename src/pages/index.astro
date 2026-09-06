@@ -7,7 +7,7 @@ import SiteTitle from '@/components/SiteTitle.astro';
 import HomePostList from '@/components/HomePostList.astro';
 
 const MAX_DISPLAY = 8;
-const posts = (await getCollection('blog', ({ data }) => data.homepage === true))
+const posts = (await getCollection('blog', ({ data }) => !data.draft && data.homepage === true))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, MAX_DISPLAY);
 ---

@@ -6,7 +6,7 @@ import Nav from '@/components/Nav.astro';
 import SiteTitle from '@/components/SiteTitle.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 
-const posts = (await getCollection('blog')).sort(
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
