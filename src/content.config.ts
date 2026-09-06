@@ -7,14 +7,11 @@ const blog = defineCollection({
   schema: ({ image }) =>
     z.object({
       title: z.string(),
-      summary: z.string().optional(),
+      pubDate: z.coerce.date(),
+      updatedDate: z.coerce.date().optional(),
       description: z.string().optional(),
       comments: z.boolean().default(true),
       authors: z.array(z.string()).default(['default']),
-      date: z.coerce.date().optional(),
-      lastmod: z.coerce.date().optional(),
-      pubDate: z.coerce.date(),
-      updatedDate: z.coerce.date().optional(),
       heroImage: z.optional(image()),
       layout: z.string().default('Blog'),
       tags: z.array(z.string()).default([]),
@@ -22,7 +19,6 @@ const blog = defineCollection({
       draft: z.boolean().default(false),
       homepage: z.boolean().default(false),
       homepageOrder: z.number().optional(),
-      // Images are resolved by Astro; local videos are emitted as Vite assets by the homepage.
       homepageMedia: z
         .union([z.string().regex(/^\.{1,2}\/.*\.(mp4|webm|ogg)$/i), image()])
         .optional(),
