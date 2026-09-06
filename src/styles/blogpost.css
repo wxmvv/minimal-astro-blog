@@ -1,0 +1,102 @@
+.prose {
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply m-0;
+}
+h1 {
+  @apply font-medium;
+  @apply text-base;
+}
+h2 {
+  @apply font-normal;
+  @apply text-base;
+}
+h3 {
+  @apply font-light;
+  @apply text-base;
+}
+h4 {
+  @apply font-extralight;
+  @apply text-base;
+}
+h5 {
+  @apply font-extralight;
+  @apply text-base;
+}
+
+strong,
+b {
+  font-weight: 700;
+}
+
+a {
+  @apply underline relative inline-block transition-colors duration-300 will-change-transform underline-offset-2;
+  text-decoration-color: #eeeff2;
+  text-decoration-thickness: 2px;
+}
+
+a:hover {
+  text-decoration-color: #d4d4d8;
+  transition-property: all;
+  transition-duration: 0.2s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* markdown */
+.prose {
+  @apply section-g8;
+}
+
+textarea {
+  width: 100%;
+  font-size: 16px;
+}
+input {
+  font-size: 16px;
+}
+table {
+  width: 100%;
+}
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+code {
+  padding: 2px 5px;
+  background-color: rgb(var(--gray-light));
+  border-radius: 2px;
+}
+pre {
+  padding: 1.5em;
+  border-radius: 8px;
+}
+pre > code {
+  all: unset;
+}
+
+.astro-code,
+.astro-code span {
+  font-size: 13px;
+  @variant dark {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+  }
+}
+
+blockquote {
+  border-left: 4px solid var(--accent);
+  padding: 0 0 0 20px;
+  margin: 0;
+  font-size: 1.333em;
+}
+hr {
+  border: none;
+  border-top: 1px solid rgb(var(--gray-light));
+}

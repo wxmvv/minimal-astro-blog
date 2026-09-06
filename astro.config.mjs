@@ -10,6 +10,15 @@ import { siteMetadata } from '@data/config/site';
 export default defineConfig({
   site: siteMetadata.siteUrl,
   integrations: [mdx(), sitemap()],
+  markdown: {
+    // https://docs.astro.build/en/reference/configuration-reference/#markdownshikiconfig
+    shikiConfig: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+    },
+  },
   vite: {
     plugins: [tailwindcss()],
   },
