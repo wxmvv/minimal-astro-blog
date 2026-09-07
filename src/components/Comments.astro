@@ -6,7 +6,7 @@ const { provider, giscusConfig } = siteMetadata.comments;
 
 {
   provider === 'giscus' && (
-    <section id="comments" aria-label="评论">
+    <section id="comments" aria-label="评论" class="mt-16">
       <blog-comments data-config={JSON.stringify(giscusConfig)} />
     </section>
   )
@@ -73,16 +73,3 @@ const { provider, giscusConfig } = siteMetadata.comments;
     customElements.define('blog-comments', BlogComments);
   }
 </script>
-
-<style>
-  section {
-    width: 720px;
-    max-width: calc(100% - 2em);
-    margin: 2em auto 0;
-    padding: 1em;
-  }
-
-  blog-comments {
-    display: block;
-  }
-</style>
