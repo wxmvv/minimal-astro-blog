@@ -108,6 +108,21 @@ const previews = await Promise.all(
       let previousTime = 0;
       const current = { x: 0, y: 0 };
       const target = { x: 0, y: 0 };
+      const pointer = { x: 0, y: 0 };
+
+      const drawBorderHighlight = () => {
+        if (!hovered) return;
+        const rect = glass.getBoundingClientRect();
+        glass.style.setProperty('--border-x', `${pointer.x - rect.left}px`);
+        glass.style.setProperty('--border-y', `${pointer.y - rect.top}px`);
+      };
+
+      const trackPointer = (event: PointerEvent) => {
+        pointer.x = event.clientX;
+        pointer.y = event.clientY;
+        glass.classList.add('is-pointer-hovered');
+        drawBorderHighlight();
+      };
 
       const drawOffset = () => {
         glass.style.transform = `translate(${current.x * 4}px, ${current.y * 4}px)`;
@@ -127,7 +142,8 @@ const previews = await Promise.all(
         if (settled) Object.assign(current, target);
         drawOffset();
         measureBackground();
-        frame = settled && !isTrackingMotion() ? 0 : requestAnimationFrame(tick);
+        drawBorderHighlight();
+        frame = settled && !hovered && !isTrackingMotion() ? 0 : requestAnimationFrame(tick);
       };
 
       const moveOffset = (x = 0, y = 0) => {
@@ -251,6 +267,7 @@ const previews = await Promise.all(
         const content = active?.querySelector<HTMLElement>('.post-content');
         if (content) content.style.transform = '';
         active = null;
+        glass.classList.remove('is-pointer-hovered');
         delete this.dataset.activeIndex;
         background.classList.remove('is-active');
         moveOffset();
@@ -274,6 +291,8 @@ const previews = await Promise.all(
             if (!finePointer.matches || event.pointerType === 'touch') return;
             hovered = link;
             activate(link);
+            trackPointer(event);
+            moveOffset();
           },
           { signal },
         );
@@ -281,6 +300,7 @@ const previews = await Promise.all(
           'pointermove',
           (event) => {
             if (hovered !== link || event.pointerType === 'touch') return;
+            trackPointer(event);
             const rect = link.getBoundingClientRect();
             const clamp = (value: number) => Math.max(-1, Math.min(1, value));
             moveOffset(
@@ -293,6 +313,7 @@ const previews = await Promise.all(
         const pointerLeave = () => {
           if (hovered !== link) return;
           hovered = null;
+          glass.classList.remove('is-pointer-hovered');
           leave();
         };
         link.addEventListener('pointerleave', pointerLeave, { signal });
@@ -409,9 +430,39 @@ const previews = await Promise.all(
   }
 
   .hover-glass {
+    position: relative;
     width: 100%;
     height: 100%;
     border-radius: inherit;
+  }
+
+  .hover-glass::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: radial-gradient(
+      100px circle at var(--border-x, 50%) var(--border-y, 50%),
+      rgb(255 255 255 / 95%),
+      rgb(255 255 255 / 45%) 35%,
+      transparent 60%
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .hover-glass.is-pointer-hovered::after {
+    /* 边缘光亮度 */
+    opacity: 0.6;
   }
 
   .previews {
@@ -465,6 +516,7 @@ const previews = await Promise.all(
 
   @media (prefers-reduced-motion: reduce) {
     .hover-background,
+    .hover-glass::after,
     .previews,
     .preview {
       transition: none;
