@@ -1,33 +1,51 @@
 ---
+import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import type { PageMeta } from '@data/config/site';
-import BaseLayout from '@/layouts/BaseLayout.astro';
+import BaseLayout from '@/layouts/Base.astro';
+import FormattedDate from '@/components/FormattedDate.astro';
+import Comments from '@/components/Comments.astro';
 
-interface Props {
-  content: CollectionEntry<'blog'>['data'];
-  title: string;
+type Props = CollectionEntry<'blog'>['data'] & {
   meta?: PageMeta;
-}
+};
 
-const { content, title, meta } = Astro.props;
-const { pubDate, heroImage, updatedDate, description } = content;
+const { title, description, pubDate, updatedDate, heroImage, meta, comments = true } = Astro.props;
+const resolvedMeta: PageMeta = meta ?? {
+  title,
+  description,
+  image: heroImage?.src,
+  type: 'article',
+  publishedTime: pubDate,
+  updatedTime: updatedDate,
+};
 ---
 
-<BaseLayout meta={meta}>
+<BaseLayout meta={resolvedMeta}>
   <main>
-    <article class="section-g12">
-      <!-- <header>
-        <h1>{title}</h1>
-        {avatar && <img src={avatar} alt={name} width="160" height="160" />}
-        <p>{name}</p>
-        {role && <p>{role}</p>}
-      </header> -->
+    <article>
+      <div class="prose" data-motion-item>
+        <div class="section-g1 w-fit">
+          <h1>{title}</h1>
+          <div class="text-zz">
+            <FormattedDate date={pubDate} />
+            {
+              updatedDate && (
+                <div class="last-updated-on">
+                  Last updated on <FormattedDate date={updatedDate} />
+                </div>
+              )
+            }
+          </div>
+        </div>
 
-      <div class="prose">
+        <div class="hero-image" data-motion-item>
+          {heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
+        </div>
+
         <slot />
       </div>
-
-      <slot name="extra" />
     </article>
+    {comments && <Comments />}
   </main>
 </BaseLayout>

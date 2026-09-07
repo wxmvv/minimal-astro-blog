@@ -3,7 +3,7 @@ import { getEntry, render } from 'astro:content';
 import { pageMetadata } from '@data/config/site';
 import About from '@/components/About.astro';
 import Nav from '@/components/Nav.astro';
-import BaseLayout from '@/layouts/BaseLayout.astro';
+import BaseLayout from '@/layouts/Base.astro';
 import SiteTitle from '@/components/SiteTitle.astro';
 
 const author = await getEntry('about', 'about');
