@@ -37,7 +37,7 @@ function getProjectImage(path: string): ImageMetadata {
                   <img
                     src={project.image}
                     alt={project.title}
-                    class="object-contain w-full h-full"
+                    class="object-cover w-full h-full"
                     loading="lazy"
                     decoding="async"
                   />
@@ -45,7 +45,7 @@ function getProjectImage(path: string): ImageMetadata {
                   <Image
                     src={getProjectImage(project.image)}
                     alt={project.title}
-                    class="object-contain"
+                    class="object-cover"
                     loading="lazy"
                   />
                 )}
