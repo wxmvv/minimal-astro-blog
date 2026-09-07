@@ -1,4 +1,16 @@
 .prose {
+  h2 {
+    @apply text-zz;
+  }
+  h3 {
+    @apply text-zz;
+  }
+  h4 {
+    @apply text-zz;
+  }
+  h5 {
+    @apply text-zz;
+  }
 }
 
 h1,
