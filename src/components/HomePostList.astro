@@ -80,7 +80,7 @@ const previews = await Promise.all(
 </home-post-list>
 
 <script>
-  import { createLiquidGlass } from '@/utils/LiquidGlass';
+  import { createLiquidGlass } from '@/utils/LiquidGlass3';
 
   class HomePostList extends HTMLElement {
     private cleanup?: () => void;
@@ -90,7 +90,6 @@ const previews = await Promise.all(
       const background = this.querySelector<HTMLElement>('.hover-background')!;
       const glass = this.querySelector<HTMLElement>('.hover-glass')!;
       const glassEffect = createLiquidGlass(glass);
-      glassEffect.setRefraction(100);
       const previewLayer = this.querySelector<HTMLElement>('.previews')!;
       const links = [...this.querySelectorAll<HTMLAnchorElement>('[data-post-index]')];
       const previews = [...this.querySelectorAll<HTMLElement>('[data-preview-index]')];
