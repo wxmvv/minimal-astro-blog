@@ -32,7 +32,7 @@ function getProjectImage(path: string): ImageMetadata {
         projects.map((project) => (
           <li class="section-g2" data-motion-item>
             {project.image && (
-              <div class="flex flex-row justify-center bg-zinc-100 rounded-sm aspect-square">
+              <div class="flex flex-row justify-center bg-zinc-100 rounded-sm aspect-square overflow-hidden">
                 {/^https?:\/\//i.test(project.image) ? (
                   <img
                     src={project.image}
