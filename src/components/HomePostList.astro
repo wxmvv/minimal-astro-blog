@@ -385,6 +385,40 @@ const previews = await Promise.all(
     left: 55%;
     width: var(--preview-width, 0px);
     pointer-events: none;
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+    transition:
+      opacity 0.4s ease,
+      filter 0.4s ease,
+      transform 0.4s ease;
+  }
+
+  /* Hover layers enter only after the staggered page animation completes. */
+  :global(
+      html:is(
+        [data-page-motion='pending'],
+        [data-page-motion='entering'],
+        [data-page-motion='exiting']
+      )
+    )
+    .hover-background {
+    opacity: 0;
+    transition: none;
+  }
+
+  :global(
+      html:is(
+        [data-page-motion='pending'],
+        [data-page-motion='entering'],
+        [data-page-motion='exiting']
+      )
+    )
+    .previews {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(16px);
+    transition: none;
   }
 
   .preview {
@@ -428,6 +462,7 @@ const previews = await Promise.all(
 
   @media (prefers-reduced-motion: reduce) {
     .hover-background,
+    .previews,
     .preview {
       transition: none;
     }
