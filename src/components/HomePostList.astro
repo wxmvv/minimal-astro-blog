@@ -162,9 +162,46 @@ const previews = await Promise.all(
       };
 
       const isTrackingMotion = () =>
-        active !== null && document.documentElement.dataset.pageMotion === 'entering';
+        active !== null &&
+        !reducedMotion.matches &&
+        ['pending', 'entering'].includes(document.documentElement.dataset.pageMotion ?? '');
+
+      const syncEntryMotion = () => {
+        const item = active?.closest<HTMLElement>('[data-motion-item]');
+        if (!isTrackingMotion() || !item) {
+          glass.style.opacity = '';
+          glass.style.filter = '';
+          previewLayer.style.opacity = '';
+          previewLayer.style.filter = '';
+          previewLayer.style.transform = '';
+          return;
+        }
+
+        // The background already inherits the page container's animation.
+        // The body-mounted preview needs the combined animation of every ancestor.
+        const itemStyle = getComputedStyle(item);
+        glass.style.opacity = itemStyle.opacity;
+        glass.style.filter = itemStyle.filter;
+        let opacity = 1;
+        let y = 0;
+        const filters: string[] = [];
+        for (
+          let node: HTMLElement | null = item;
+          node && node !== document.body;
+          node = node.parentElement
+        ) {
+          const style = getComputedStyle(node);
+          opacity *= Number(style.opacity);
+          if (style.filter !== 'none') filters.push(style.filter);
+          if (style.transform !== 'none') y += new DOMMatrixReadOnly(style.transform).m42;
+        }
+        previewLayer.style.opacity = String(opacity);
+        previewLayer.style.filter = filters.join(' ') || 'none';
+        previewLayer.style.transform = `translateY(${y}px)`;
+      };
 
       const measureBackground = () => {
+        syncEntryMotion();
         background.classList.toggle('is-tracking-motion', isTrackingMotion());
         if (!active) return;
         // The link's ancestor moves during entry; its content has a separate pointer offset.
@@ -385,40 +422,6 @@ const previews = await Promise.all(
     left: 55%;
     width: var(--preview-width, 0px);
     pointer-events: none;
-    opacity: 1;
-    filter: blur(0);
-    transform: translateY(0);
-    transition:
-      opacity 0.4s ease,
-      filter 0.4s ease,
-      transform 0.4s ease;
-  }
-
-  /* Hover layers enter only after the staggered page animation completes. */
-  :global(
-      html:is(
-        [data-page-motion='pending'],
-        [data-page-motion='entering'],
-        [data-page-motion='exiting']
-      )
-    )
-    .hover-background {
-    opacity: 0;
-    transition: none;
-  }
-
-  :global(
-      html:is(
-        [data-page-motion='pending'],
-        [data-page-motion='entering'],
-        [data-page-motion='exiting']
-      )
-    )
-    .previews {
-    opacity: 0;
-    filter: blur(8px);
-    transform: translateY(16px);
-    transition: none;
   }
 
   .preview {
