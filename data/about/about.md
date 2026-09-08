@@ -1,14 +1,10 @@
 ---
-name: wxm
+name: Astro
 avatar: /avatar.png
-# occupation: Professor of Atmospheric Science
-# company: Stanford University
-email: wxmvv@outlook.com
-# twitter: https://twitter.com/Twitter
-# linkedin: https://www.linkedin.com
-github: https://github.com/wxmvv
+email: address@yoursite.com
+twitter: https://twitter.com/Twitter
+linkedin: https://www.linkedin.com
+github: https://github.com
 ---
 
-Hello ~ I'm wxm, a developer, who likes programming and music.
-
-Stay curious and keep tinkering.
+Astro is a web framework that takes the best from the early internet (think HTML and CSS) and puts it to work in a next-gen architecture to make every Astro site, and the whole web, faster. Whereas most frameworks today are designed for web apps, Astro is built for content-rich sites where performance matters most. Pull content from anywhere, deploy everywhere, and let's build the web we want, together.

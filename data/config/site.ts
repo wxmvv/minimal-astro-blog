@@ -13,7 +13,7 @@ export const siteMetadata = {
   title: 'minimal-astro-blog',
   subtitle: 'A minimal blog template for Astro',
   description: 'Welcome to my website!',
-  author: 'wxm',
+  author: 'Astro',
   language: 'zh-cn',
   locale: 'zh-CN',
   siteUrl: 'https://wxmvv.dev',
@@ -76,78 +76,18 @@ export const siteMetadata = {
   },
   trackList: [
     {
-      url: '/static/bg_audio/Nujabes - Blessing It -remix (feat.Substantial & Pase Rock from Five Deez).mp3',
-      title: 'Nujabes - Blessing It -remix (feat.Substantial & Pase Rock from Five Deez)',
-      tags: ['Metaphorical Music', 'Nujabes'],
-    },
-    {
-      url: '/static/bg_audio/Nujabes - Horn in the middle.mp3',
-      title: 'Nujabes - Horn in the middle',
-      tags: ['Metaphorical Music', 'Nujabes'],
-    },
-    {
-      url: '/static/bg_audio/Nujabes - Lady Brown (feat. Cise Starr from CYNE).mp3',
-      title: 'Nujabes - Lady Brown (feat. Cise Starr from CYNE)',
-      tags: ['Metaphorical Music', 'Nujabes'],
-    },
-    {
-      url: '/static/bg_audio/Nujabes - Kumomi.mp3',
-      title: 'Nujabes - Kumomi',
-      tags: ['Metaphorical Music', 'Nujabes'],
-    },
-    {
-      url: '/static/bg_audio/Nujabes - Highs 2 Lows (feat.Cise Starr from CYNE).mp3',
-      title: 'Nujabes - Highs 2 Lows (feat.Cise Starr from CYNE)',
-      tags: ['Metaphorical Music', 'Nujabes'],
-    },
-    {
-      url: '/static/bg_audio/Nujabes - Beat laments the world.mp3',
+      url: '../assets/bg_audio/Nujabes - Beat laments the world.mp3',
       title: 'Nujabes - Beat laments the world',
       tags: ['Metaphorical Music', 'Nujabes'],
     },
     {
-      url: '/static/bg_audio/Nujabes - Letter from Yokosuka.mp3',
+      url: '../assets/bg_audio/Nujabes - Letter from Yokosuka.mp3',
       title: 'Nujabes - Letter from Yokosuka',
       tags: ['Metaphorical Music', 'Nujabes'],
     },
     {
-      url: '/static/bg_audio/Nujabes - Think Different (feat.Substantial).mp3',
-      title: 'Nujabes - Think Different (feat.Substantial)',
-      tags: ['Metaphorical Music', 'Nujabes'],
-    },
-    // {
-    // 	url: '/static/bg_audio/Nujabes - A day by atmosphere supreme.mp3',
-    // 	title: 'Nujabes - A day by atmosphere supreme',
-    // 	tags: ['Metaphorical Music', 'Nujabes']
-    // },
-    {
-      url: '/static/bg_audio/Nujabes - Next view (feat. Uyama Hiroto).mp3',
-      title: 'Nujabes - Next view (feat. Uyama Hiroto)',
-      tags: ['Metaphorical Music', 'Nujabes'],
-    },
-    {
-      url: '/static/bg_audio/Nujabes - Latitude -remix (feat.Five Deez).mp3',
-      title: 'Nujabes - Latitude -remix (feat.Five Deez)',
-      tags: ['Metaphorical Music', 'Nujabes'],
-    },
-    {
-      url: '/static/bg_audio/Nujabes - F.I.L.O. (feat. Shing02).mp3',
-      title: 'Nujabes - F.I.L.O. (feat. Shing02)',
-      tags: ['Metaphorical Music', 'Nujabes'],
-    },
-    {
-      url: '/static/bg_audio/Nujabes - Summer Gypsy.mp3',
-      title: 'Nujabes - Summer Gypsy',
-      tags: ['Metaphorical Music', 'Nujabes'],
-    },
-    {
-      url: '/static/bg_audio/Nujabes - The Final View.mp3',
+      url: '../assets/bg_audio/Nujabes - The Final View.mp3',
       title: 'Nujabes - The Final View',
-      tags: ['Metaphorical Music', 'Nujabes'],
-    },
-    {
-      url: '/static/bg_audio/Nujabes - Peaceland.mp3',
-      title: 'Nujabes - Peaceland',
       tags: ['Metaphorical Music', 'Nujabes'],
     },
   ],
