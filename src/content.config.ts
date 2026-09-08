@@ -14,7 +14,7 @@ const blog = defineCollection({
       comments: blankAsMissing(z.boolean().default(true)),
       authors: stringList(['default']),
       heroImage: blankAsMissing(image().optional()),
-      layout: blankAsMissing(z.string().default('Blog')),
+      postLayout: blankAsMissing(z.string().default('Blog')),
       tags: stringList(),
       categories: stringList(),
       draft: blankAsMissing(z.boolean().default(false)),

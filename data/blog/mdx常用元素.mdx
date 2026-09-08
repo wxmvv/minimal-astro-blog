@@ -1,0 +1,224 @@
+---
+title: mdx 常用元素
+pubDate: 2024-07-05 18:26
+updatedDate: 2024-07-05
+tags:
+  - markdown
+  - mdx
+categories:
+  - code
+description:
+authors:
+  - default
+draft: false
+homepage: true
+homepageMedia: "../assets/work.jpg"
+comments: true
+---
+
+import { Image } from "astro:assets";
+import workImage from "../assets/work.jpg";
+import testVideo from "../assets/video/test_video.mp4";
+
+这里是这个模版的一些常用 mdx 元素,写在这里方便复制使用。
+
+## B 站视频
+
+```html
+<iframe
+  src="//player.bilibili.com/player.html?isOutside=true&aid=1355658592&bvid=BV1Xz421b7FU&cid=1574676110&p=1&autoplay=0&muted=0"
+  class="w-full h-[344px]"
+  autoPlay="0"
+  muted="0"
+  scrolling="no"
+  border="0"
+  frameborder="no"
+  framespacing="0"
+  allowfullscreen
+></iframe>
+```
+
+<iframe
+  src="//player.bilibili.com/player.html?isOutside=true&aid=1355658592&bvid=BV1Xz421b7FU&cid=1574676110&p=1&autoplay=0&muted=0"
+  class="w-full h-[344px]"
+  scrolling="no"
+  border="0"
+  frameborder="no"
+  autoplay="0"
+  muted="0"
+  framespacing="0"
+  allowFullScreen
+></iframe>
+
+## markdown 图片
+
+`![测试图片](../assets/work.jpg)`
+![测试图片](../assets/work.jpg)
+
+## mdx 图片(宽)
+
+```html
+<div class="flex flex-row justify-center bg-zinc-100  rounded md:-mx-28">
+  <img
+    alt="GitHub test"
+    loading="lazy"
+    width="2000"
+    height="1000"
+    decoding="async"
+    data-nimg="1"
+    class="my-0 rounded"
+    srcset=""
+    src="../assets/work.jpg"
+  />
+</div>
+```
+
+<div class="flex flex-row justify-center bg-zinc-100  rounded md:-mx-28">
+  <Image alt="GitHub test" loading="lazy" class="my-0 rounded" src={workImage} />
+</div>
+
+## mdx 视频(普通)
+
+```jsx
+<div class="flex flex-row justify-center bg-zinc-100 rounded-sm ">
+    <video autoPlay loop preload="auto" playsInline class="my-0 rounded">
+        <source src={testVideo} type="video/mp4">
+    </video>
+</div>
+```
+
+<div class="flex flex-row justify-center bg-zinc-100 rounded-sm ">
+  <video autoPlay loop preload="auto" playsInline class="my-0 rounded">
+    <source src={testVideo} type="video/mp4" />
+  </video>
+</div>
+
+## mdx 视频(宽)
+
+```jsx
+<div class="flex flex-row justify-center bg-zinc-100 rounded-sm md:-mx-28">
+  <video autoPlay loop preload="auto" playsInline class="my-0 rounded">
+    <source src={testVideo} type="video/mp4" />
+  </video>
+</div>
+```
+
+<div class="flex flex-row justify-center bg-zinc-100 rounded-sm md:-mx-28">
+  <video autoPlay loop preload="auto" playsInline class="rounded my-0">
+    <source src={testVideo} type="video/mp4" />
+  </video>
+</div>
+
+## 链接
+
+`<a href="https://google.com" target="blank"></a>`
+
+<div>
+  <a href="https://google.com" target="blank">
+    前往谷歌
+  </a>
+</div>
+
+## 布局
+
+### 两列布局(宽)
+
+`<div class="grid gap-6 md:grid-cols-2 md:-mx-24"></div>`
+
+<div class="grid gap-6 md:grid-cols-2 md:-mx-24">
+  <div class="flex flex-col gap-2">
+    <video autoPlay loop preload="auto" playsInline class="my-0 rounded-md md:max-h-[540px]">
+      <source src={testVideo} type="video/mp4" />
+    </video>
+    <div class="flex flex-col px-2 pt-2">
+      <div>Github Test</div>
+      <div class="imgDesc parent flex flex-col my-0 space-y-0 text-zinc-400">
+        Github Test Github Test Github Test Github Test Github Test Github Test
+      </div>
+    </div>
+  </div>
+  <div class="col-span-2">
+    <div class="flex flex-col gap-2">
+      <a href="https://google.com" target="blank">
+        <video autoPlay loop preload="auto" playsInline class="my-0 rounded-md md:max-h-[540px]">
+          <source src={testVideo} type="video/mp4" />
+        </video>
+      </a>
+      <div class="flex flex-col px-2 pt-2">
+        <div class="my-0">Github Test</div>
+        <div class="imgDesc my-0 text-zinc-400">
+          Github Test Github Test Github Test Github Test Github Test Github Test
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+### 两列布局(窄)
+
+`<div class="flex flex-col gap-6 md:grid md:grid-cols-2"></div>`
+
+<div class="flex flex-col gap-6 md:grid md:grid-cols-2">
+  <div class="flex flex-col gap-2">
+    <video autoPlay loop preload="auto" playsInline class="my-0 rounded-md md:max-h-[540px]">
+      <source src={testVideo} type="video/mp4" />
+    </video>
+    <div class="flex flex-col px-2 pt-2">
+      <div>Github Test</div>
+      <div class="imgDesc text-zinc-400">
+        Github Test Github Test Github Test Github Test Github Test Github Test Github Test
+      </div>
+    </div>
+  </div>
+  <div class="col-span-2">
+    <div class="flex flex-col gap-2">
+      <a href="https://google.com" target="blank">
+        <video autoPlay loop preload="auto" playsInline class="my-0 rounded-md md:max-h-[540px]">
+          <source src={testVideo} type="video/mp4" />
+        </video>
+      </a>
+      <div class="flex flex-col px-2 pt-2">
+        <div class="my-0">Github Test</div>
+        <div class="imgDesc my-0 text-zinc-400">
+          Github Test Github Test Github Test Github Test Github Test Github Test Github Test
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+### item 单列
+
+```jsx
+<div class="flex flex-col gap-2">
+  <video autoPlay loop preload="auto" playsInline class="my-0 rounded-md md:max-h-[540px]">
+    <source src={testVideo} type="video/mp4" />
+  </video>
+  <div class="flex flex-col px-2 pt-2">
+    <div>Github Test</div>
+    <div class="imgDesc text-zinc-400">
+      Github Test Github Test Github Test Github Test Github Test Github Test Github Test
+    </div>
+  </div>
+</div>
+```
+
+### item 双列
+
+```jsx
+<div class="col-span-2">
+  <div class="flex flex-col gap-2">
+    <a href="https://google.com" target="blank">
+      <video autoPlay loop preload="auto" playsInline class="my-0 rounded-md md:max-h-[540px]">
+        <source src={testVideo} type="video/mp4" />
+      </video>
+    </a>
+    <div class="flex flex-col px-2 pt-2">
+      <div>Github Test</div>
+      <div class="imgDesc text-zinc-400">
+        Github Test Github Test Github Test Github Test Github Test Github Test
+      </div>
+    </div>
+  </div>
+</div>
+```
