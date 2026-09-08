@@ -1,0 +1,290 @@
+---
+import type { MarkdownHeading } from 'astro';
+interface Props {
+  headings: MarkdownHeading[];
+}
+// Match the reference's flat list of article sections; fall back for posts without h2s.
+const depth = Astro.props.headings.some((heading) => heading.depth === 2) ? 2 : 3;
+const headings = Astro.props.headings.filter((heading) => heading.depth === depth);
+---
+
+{
+  headings.length > 0 && (
+    <article-toc>
+      <nav aria-label="Contents of the article" class="toc">
+        <button class="toc-toggle" aria-expanded="false" aria-controls="article-toc-links">
+          <span data-toc-current>{headings[0].text}</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" />
+          </svg>
+        </button>
+        <ul id="article-toc-links">
+          {headings.map((heading, index) => (
+            <li>
+              <a
+                href={`#${heading.slug}`}
+                data-toc-link
+                aria-current={index === 0 ? 'location' : undefined}
+              >
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </article-toc>
+  )
+}
+
+<script>
+  class ArticleToc extends HTMLElement {
+    private cleanup?: () => void;
+
+    connectedCallback() {
+      const body = this.closest<HTMLElement>('[data-article-body]');
+      const button = this.querySelector<HTMLButtonElement>('button');
+      const label = this.querySelector<HTMLElement>('[data-toc-current]');
+      const list = this.querySelector<HTMLUListElement>('ul');
+      const links = [...this.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')];
+      const headings = links.map((link) =>
+        document.getElementById(decodeURIComponent(link.hash.slice(1))),
+      );
+      if (!body || !button || !label || !list) return;
+      const controller = new AbortController();
+      const { signal } = controller;
+      const wide = matchMedia('(min-width: 1200px)');
+      let frame = 0;
+      let active = -1;
+      const close = () => {
+        button.setAttribute('aria-expanded', 'false');
+      };
+      const update = () => {
+        frame = 0;
+        const rect = body.getBoundingClientRect();
+        const visible = rect.top <= 0 && rect.bottom > 64;
+        this.toggleAttribute('data-visible', visible);
+        if (!visible) close();
+        list.inert = !wide.matches && (!visible || button.getAttribute('aria-expanded') !== 'true');
+        let index = 0;
+        headings.forEach((heading, i) => {
+          if (heading && heading.getBoundingClientRect().top <= 96) index = i;
+        });
+        if (index === active) return;
+        active = index;
+        label.textContent = links[index].textContent;
+        links.forEach((link, i) => {
+          if (i === index) link.setAttribute('aria-current', 'location');
+          else link.removeAttribute('aria-current');
+        });
+        // Keep the selected section visible in long desktop directories.
+        if (wide.matches) {
+          const linkRect = links[index].getBoundingClientRect();
+          const listRect = list.getBoundingClientRect();
+          if (linkRect.bottom > listRect.bottom)
+            list.scrollTop += linkRect.bottom - listRect.bottom;
+          if (linkRect.top < listRect.top) list.scrollTop -= listRect.top - linkRect.top;
+        }
+      };
+      const schedule = () => {
+        if (!frame) frame = requestAnimationFrame(update);
+      };
+      button.addEventListener(
+        'click',
+        () => {
+          button.setAttribute(
+            'aria-expanded',
+            String(button.getAttribute('aria-expanded') !== 'true'),
+          );
+          update();
+        },
+        { signal },
+      );
+      this.addEventListener(
+        'click',
+        (event) => {
+          if (!(event.target instanceof Element) || !event.target.closest('a')) return;
+          close();
+          if (!wide.matches) button.focus({ preventScroll: true });
+          schedule();
+        },
+        { signal },
+      );
+      document.addEventListener(
+        'click',
+        (event) => {
+          if (event.target instanceof Node && !this.contains(event.target)) {
+            close();
+            schedule();
+          }
+        },
+        { signal },
+      );
+      document.addEventListener(
+        'keydown',
+        (event) => {
+          if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') {
+            close();
+            button.focus({ preventScroll: true });
+            schedule();
+          }
+        },
+        { signal },
+      );
+      window.addEventListener('scroll', schedule, { passive: true, signal });
+      window.addEventListener('resize', schedule, { signal });
+      document.addEventListener('site:motion-complete', schedule, { signal });
+      const observer = new ResizeObserver(schedule);
+      observer.observe(body);
+      this.cleanup = () => {
+        controller.abort();
+        observer.disconnect();
+        cancelAnimationFrame(frame);
+      };
+      update();
+    }
+
+    disconnectedCallback() {
+      this.cleanup?.();
+    }
+  }
+  if (!customElements.get('article-toc')) customElements.define('article-toc', ArticleToc);
+</script>
+
+<style>
+  article-toc {
+    --toc-bg: #fff;
+    --toc-muted: #737373;
+    /*--toc-hover: #f5f5f5;*/
+    --toc-hover: transparent;
+    display: block;
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    z-index: 20;
+  }
+  /*dark*/
+  @media (prefers-color-scheme: dark) {
+    article-toc {
+      --toc-bg: #030712;
+      --toc-muted: #a3a3a3;
+      /*--toc-hover: #171d29;*/
+      --toc-hover: transparent;
+    }
+  }
+  :global(.dark) article-toc {
+    --toc-bg: #030712;
+    --toc-muted: #a3a3a3;
+    --toc-hover: #171d29;
+  }
+  .toc {
+    position: fixed;
+    inset: 0 0 auto;
+    background: var(--toc-bg);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 150ms;
+    font-size: 12px;
+    /*line-height: 1.5;*/
+  }
+  [data-visible] .toc {
+    visibility: visible;
+    opacity: 1;
+  }
+  .toc-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    width: 100%;
+    min-height: 64px;
+    padding: 16px 24px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+  }
+  .toc-toggle span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  svg {
+    flex-shrink: 0;
+    transition: transform 150ms;
+  }
+  [aria-expanded='true'] svg {
+    transform: rotate(180deg);
+  }
+  ul {
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: 0 24px 16px 24px;
+    max-height: min(65dvh, 640px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  [aria-expanded='true'] + ul {
+    display: block;
+  }
+  a {
+    display: block;
+    padding-block: 8px;
+    border-radius: 8px;
+    color: var(--toc-muted);
+    text-decoration: none;
+    font-weight: 400;
+    transition:
+      color 150ms,
+      background-color 150ms;
+  }
+  a:hover {
+    color: inherit;
+    background: var(--toc-hover);
+  }
+  a[aria-current='location'] {
+    color: inherit;
+  }
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
+  }
+  @media (min-width: 1200px) {
+    article-toc {
+      left: -272px;
+      width: 224px;
+    }
+    .toc {
+      position: sticky;
+      top: 32px;
+      visibility: visible;
+      opacity: 1;
+      background: transparent;
+    }
+    .toc-toggle {
+      display: none;
+    }
+    ul {
+      display: block;
+      padding: 0;
+      max-height: calc(100dvh - 64px);
+    }
+    li + li {
+      margin-top: 4px;
+    }
+    a {
+      padding-block: 8px;
+      /*padding: 8px 12px;*/
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .toc,
+    svg,
+    a {
+      transition: none;
+    }
+  }
+</style>

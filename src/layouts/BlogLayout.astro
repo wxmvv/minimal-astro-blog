@@ -5,12 +5,16 @@ import type { PageMeta } from '@data/config/site';
 import BaseLayout from '@/layouts/Base.astro';
 import FormattedDate from '@/components/FormattedDate.astro';
 import Comments from '@/components/Comments.astro';
+import TableOfContents from '@/components/TableOfContents.astro';
+import type { MarkdownHeading } from 'astro';
 
 type Props = CollectionEntry<'blog'>['data'] & {
   meta?: PageMeta;
+  headings?: MarkdownHeading[];
 };
 
 const { title, description, pubDate, updatedDate, heroImage, meta, comments = true } = Astro.props;
+const headings = Astro.props.headings ?? [];
 const resolvedMeta: PageMeta = meta ?? {
   title,
   description,
@@ -47,9 +51,21 @@ const resolvedMeta: PageMeta = meta ?? {
           )
         }
 
-        <slot />
+        <div class="article-body" data-article-body>
+          <TableOfContents headings={headings} />
+          <div class="prose" data-article-content><slot /></div>
+        </div>
       </div>
     </article>
     {comments && <Comments />}
   </main>
 </BaseLayout>
+
+<style>
+  .article-body {
+    position: relative;
+  }
+  [data-article-content] :global(:is(h2, h3, h4, h5, h6)[id]) {
+    scroll-margin-top: 5rem;
+  }
+</style>
