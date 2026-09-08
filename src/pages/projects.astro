@@ -52,7 +52,7 @@ function getProjectImage(path: string): ImageMetadata {
               </div>
             )}
             <article>
-              <h2>{project.href ? <a href={project.href}>{project.title}</a> : project.title}</h2>
+              <h2>{project.href ? <a target="_blank" href={project.href}>{project.title}</a> : project.title}</h2>
               {project.year && <p class="text-zz">{project.year}</p>}
               {project.tag && <p class="text-zz">{project.tag}</p>}
               <p class="text-zz">{project.description}</p>
