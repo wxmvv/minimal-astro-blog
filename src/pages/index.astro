@@ -16,7 +16,6 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft && data.hom
   <SiteTitle />
   <Nav />
   <main>
-    <h1 class="sr-only">首页文章</h1>
     {posts.length > 0 ? <HomePostList posts={posts} /> : <p class="text-zz">暂无首页文章</p>}
   </main>
 </BaseLayout>

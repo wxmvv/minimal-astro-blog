@@ -25,49 +25,46 @@ const sortedTags = [...tagCounts].sort((a, b) => b[1] - a[1] || a[0].localeCompa
   <SiteTitle />
   <Nav />
   <main class="section-g12">
-    <section aria-labelledby="post-list-title">
-      <h2 id="post-list-title" class="sr-only">文章列表</h2>
-      <ul>
-        {
-          posts.map((post) => {
-            const { tags } = post.data;
+    <ul>
+      {
+        posts.map((post) => {
+          const { tags } = post.data;
 
-            return (
-              <li class="mb-6">
-                <article class="flex flex-col gap-2">
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    <FormattedDate date={post.data.pubDate} />
-                  </p>
+          return (
+            <li class="mb-6">
+              <article class="flex flex-col gap-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  <FormattedDate date={post.data.pubDate} />
+                </p>
 
-                  <div class="section-g2">
-                    <div>
-                      <h2 class="inline-block font-medium">
-                        <a
-                          href={`/blog/${post.id}/`}
-                          class="text-gray-900 underline decoration-gray-300 underline-offset-4 hover:decoration-gray-800 dark:text-gray-100 dark:decoration-gray-500 dark:hover:decoration-gray-200"
-                        >
-                          {post.data.title}
-                        </a>
-                      </h2>
+                <div class="section-g2">
+                  <div>
+                    <h2 class="inline-block font-medium">
+                      <a
+                        href={`/blog/${post.id}/`}
+                        class="text-gray-900 underline decoration-gray-300 underline-offset-4 hover:decoration-gray-800 dark:text-gray-100 dark:decoration-gray-500 dark:hover:decoration-gray-200"
+                      >
+                        {post.data.title}
+                      </a>
+                    </h2>
 
-                      {tags.length > 0 && (
-                        <p class="flex flex-wrap gap-x-1 text-sm font-medium text-gray-400">
-                          {tags.map((tag) => (
-                            <span>{tag.split(' ').join('-')}</span>
-                          ))}
-                        </p>
-                      )}
-                    </div>
-
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{post.data.description}</p>
+                    {tags.length > 0 && (
+                      <p class="flex flex-wrap gap-x-1 text-sm font-medium text-gray-400">
+                        {tags.map((tag) => (
+                          <span>{tag.split(' ').join('-')}</span>
+                        ))}
+                      </p>
+                    )}
                   </div>
-                </article>
-              </li>
-            );
-          })
-        }
-      </ul>
-    </section>
+
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{post.data.description}</p>
+                </div>
+              </article>
+            </li>
+          );
+        })
+      }
+    </ul>
   </main>
 </BaseLayout>
 
