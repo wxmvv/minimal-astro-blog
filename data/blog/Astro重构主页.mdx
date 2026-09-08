@@ -1,0 +1,52 @@
+---
+title: 2026 使用 Astro 重构主页
+pubDate: 2026-09-08 10:26
+updatedDate: 2026-09-08 10:26
+tags:
+  - Astro
+  - js
+categories:
+  - code
+description:
+comments: true
+authors:
+  - default
+draft: false
+homepage: true
+homepageMedia: "../../public/avatar.png"
+---
+
+import { Image } from "astro:assets";
+import AstroLogoDark from "../assets/astro-logo-dark.png";
+import AstroLogoLight from "../assets/astro-logo-light.png";
+
+<div class="flex flex-row justify-center rounded md:-mx-28">
+  <Image
+    alt="Astro Light"
+    class="dark:hidden my-0 rounded"
+    loading="lazy"
+    width="2000"
+    height="1000"
+    decoding="async"
+    data-nimg="1"
+    src={AstroLogoDark}
+  />
+  <Image
+    alt="Astro Dark"
+    class="hidden dark:block my-0 rounded"
+    loading="lazy"
+    width="2000"
+    height="1000"
+    decoding="async"
+    data-nimg="1"
+    src={AstroLogoLight}
+  />
+</div>
+
+没想到吧，我又来了,这回是[Astro](https://astro.build/)~
+
+项目在这里 [minimal-astro-blog](https://github.com/wxmvv/minimal-astro-blog)
+
+最近流行去 nextjs 风潮，有很多项目开始使用 TanStack 来替代 nextjs，让我想起了这个古老的博客项目，本来想升级一下项目版本，结果很多不兼容，很多包的问题，改起来很麻烦，索性再次重构。
+
+Astro 用起来很顺手而且简洁方便，并且可以无缝衔接vue或react，代码写起来很舒服，再加上现在的ai检查，搞的飞起！
