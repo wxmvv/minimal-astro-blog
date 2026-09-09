@@ -11,6 +11,9 @@ const hidden = { opacity: 0, y: 16, filter: 'blur(8px)' };
 const clearProps = 'opacity,transform,filter,willChange';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let animation: gsap.core.Timeline | undefined;
+let upperAnimation: gsap.core.Timeline | undefined;
+let indicatorAnimation: gsap.core.Tween | undefined;
+const preparedUpper = new WeakSet<HTMLElement>();
 let preparedRoot: HTMLElement | null = null;
 let previousIndicator: { left: number; width: number } | undefined;
 let pendingNavigation: URL | undefined;
@@ -50,9 +53,8 @@ const getContainer = (root: HTMLElement) =>
   root.dataset.motionScope === 'tab' ? (root.querySelector<HTMLElement>('main') ?? root) : root;
 
 function restore(root: HTMLElement) {
-  gsap.set([root, getContainer(root), ...getItems(root)], { clearProps });
-  const indicator = root.querySelector<HTMLElement>('[data-nav-indicator]');
-  if (indicator) gsap.set(indicator, { clearProps: 'transform,transformOrigin' });
+  const container = getContainer(root);
+  gsap.set([root, container, ...getItems(container)], { clearProps });
   document.documentElement.dataset.pageMotion = 'idle';
   document.dispatchEvent(new Event('site:motion-complete'));
 }
@@ -62,6 +64,27 @@ function prepare() {
   animation?.kill();
   preparedRoot = getRoot();
   if (!preparedRoot) return;
+  if (preparedRoot.querySelector('[data-site-title]')) {
+    preparedRoot.dataset.motionScope = 'tab';
+    const upper = [...preparedRoot.querySelectorAll<HTMLElement>('[data-site-title], nav')];
+    if (upper.some((item) => !preparedUpper.has(item))) {
+      upperAnimation?.kill();
+      upper.forEach((item) => preparedUpper.add(item));
+      if (!reducedMotion.matches) {
+        gsap.set(upper, hidden);
+        upperAnimation = gsap.timeline({
+          onComplete: () => gsap.set(upper, { clearProps }),
+        });
+        upper.forEach((item, index) => {
+          upperAnimation!.to(
+            item,
+            { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.7, ease: blurEase },
+            0.1 + index * 0.18,
+          );
+        });
+      }
+    }
+  }
   if (reducedMotion.matches) {
     restore(preparedRoot);
     return;
@@ -84,6 +107,9 @@ function enter() {
   // Client-side navigations still animate: after-swap prepares their root before enter().
   if (root !== preparedRoot && document.documentElement.dataset.pageMotion === 'idle') {
     preparedRoot = root;
+    root.querySelectorAll<HTMLElement>('[data-site-title], nav').forEach((item) => {
+      preparedUpper.add(item);
+    });
     restore(root);
     return;
   }
@@ -121,22 +147,28 @@ function enter() {
         .to(item, { filter: 'blur(0px)', duration: 0.4, ease: blurEase }, start);
     });
   }
+}
 
-  const indicator = root.querySelector<HTMLElement>('[data-nav-indicator]');
-  if (indicator && previousIndicator) {
-    const rect = indicator.getBoundingClientRect();
-    timeline.fromTo(
-      indicator,
-      {
-        x: previousIndicator.left - rect.left,
-        scaleX: previousIndicator.width / rect.width,
-        transformOrigin: 'left center',
-      },
-      { x: 0, scaleX: 1, duration: 0.4, ease: blurEase },
-      0.1,
-    );
-  }
+function moveIndicator() {
+  indicatorAnimation?.kill();
+  const indicator = document.querySelector<HTMLElement>('[data-nav-indicator]');
+  const previous = previousIndicator;
   previousIndicator = undefined;
+  if (!indicator || !previous || reducedMotion.matches) return;
+  const rect = indicator.getBoundingClientRect();
+  // Position before the first paint of the new DOM, independently of content animation.
+  gsap.set(indicator, {
+    x: previous.left - rect.left,
+    scaleX: previous.width / rect.width,
+    transformOrigin: 'left center',
+  });
+  indicatorAnimation = gsap.to(indicator, {
+    x: 0,
+    scaleX: 1,
+    duration: 0.4,
+    ease: blurEase,
+    onComplete: () => gsap.set(indicator, { clearProps: 'transform,transformOrigin' }),
+  });
 }
 
 function exit(signal: AbortSignal): Promise<void> {
@@ -198,11 +230,7 @@ document.addEventListener('astro:before-preparation', (event) => {
         root.querySelector('[data-site-title]') && nextRoot.querySelector('[data-site-title]')
           ? 'tab'
           : 'page';
-      // Preserve the current animation's container and inline values when interrupted.
-      if (document.documentElement.dataset.pageMotion === 'idle') {
-        root.dataset.motionScope = scope;
-      }
-      nextRoot.dataset.motionScope = scope;
+      root.dataset.motionScope = nextRoot.dataset.motionScope = scope;
     }
     await exit(event.signal);
   };
@@ -211,6 +239,21 @@ document.addEventListener('astro:before-preparation', (event) => {
 document.addEventListener('astro:before-swap', (event) => {
   const rect = document.querySelector('[data-nav-indicator]')?.getBoundingClientRect();
   previousIndicator = rect ? { left: rect.left, width: rect.width } : undefined;
+  indicatorAnimation?.kill();
+  const root = getRoot();
+  const nextRoot = event.newDocument.querySelector<HTMLElement>('#main-container');
+  if (root?.querySelector('[data-site-title]') && nextRoot?.querySelector('[data-site-title]')) {
+    // Keep the actual animated nodes alive while Astro replaces the page body.
+    for (const selector of ['[data-site-title]', 'nav']) {
+      const current = root.querySelector<HTMLElement>(selector);
+      const next = nextRoot.querySelector<HTMLElement>(selector);
+      if (!current || !next) continue;
+      current.setAttribute('data-astro-transition-persist', selector);
+      next.setAttribute('data-astro-transition-persist', selector);
+      // The navigation shell persists, but its links must reflect the new current tab.
+      if (selector === 'nav') current.replaceChildren(...next.childNodes);
+    }
+  }
   // Skipping our own native snapshot transition intentionally rejects its ready promise.
   void event.viewTransition.ready.catch(() => {});
   event.viewTransition.skipTransition();
@@ -219,6 +262,7 @@ document.addEventListener('astro:before-swap', (event) => {
 document.addEventListener('astro:after-swap', () => {
   pendingNavigation = undefined;
   prepare();
+  moveIndicator();
 });
 document.addEventListener('astro:page-load', enter);
 
@@ -226,6 +270,8 @@ reducedMotion.addEventListener('change', () => {
   if (!reducedMotion.matches) return;
   // Complete, rather than kill, so a pending navigation is never left waiting.
   animation?.progress(1);
+  upperAnimation?.progress(1);
+  indicatorAnimation?.progress(1);
   const root = getRoot();
   if (root) restore(root);
 });
@@ -234,6 +280,8 @@ window.addEventListener('pageshow', (event) => {
   if (!event.persisted) return;
   pendingNavigation = undefined;
   animation?.kill();
+  upperAnimation?.progress(1);
+  indicatorAnimation?.progress(1);
   const root = getRoot();
   if (root) restore(root);
 });
