@@ -9,7 +9,7 @@ import { ClientRouter } from 'astro:transitions';
   document.documentElement.dataset.pageMotion = 'pending';
   window.setTimeout(() => {
     if (document.documentElement.dataset.pageMotion === 'pending') {
-      delete document.documentElement.dataset.pageMotion;
+      document.documentElement.dataset.pageMotion = 'idle';
     }
   }, 2500);
 </script>

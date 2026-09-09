@@ -80,6 +80,13 @@ function enter() {
     pendingNavigation = undefined;
     return;
   }
+  // The startup timeout already revealed this page. A late bundle must not hide it again.
+  // Client-side navigations still animate: after-swap prepares their root before enter().
+  if (root !== preparedRoot && document.documentElement.dataset.pageMotion === 'idle') {
+    preparedRoot = root;
+    restore(root);
+    return;
+  }
   if (root !== preparedRoot) prepare();
   if (reducedMotion.matches) {
     pendingNavigation = undefined;
