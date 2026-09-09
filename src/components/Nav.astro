@@ -24,11 +24,11 @@ const isCurrentTab = (href: string) => {
           aria-current={isActive ? 'page' : undefined}
           aria-disabled={isActive ? 'true' : undefined}
           data-nav-tab
-          class="relative shrink-0 pb-1 text-zinc-400 no-underline! hover:no-underline!"
+          class="cursor-pointer select-none relative shrink-0 pb-1 text-zinc-400 no-underline! hover:no-underline!"
         >
           {label}
           {isActive && (
-            <span data-nav-indicator class="absolute inset-x-0 -bottom-px h-0.5 bg-zinc-200" />
+            <span data-nav-indicator class="cursor-pointer select-none absolute inset-x-0 -bottom-px h-0.5 bg-zinc-200" />
           )}
         </a>
       );
