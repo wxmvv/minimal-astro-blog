@@ -61,6 +61,8 @@ export const siteMetadata = {
     },
   },
   search: {
+    // cmdk algolia kbar
+    // cmd+k show the search bar
     // Currently supports cmdk. Set provider to '' to disable search.
     provider: 'cmdk',
     cmdkConfig: {
