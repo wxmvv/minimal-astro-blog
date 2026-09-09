@@ -1,6 +1,7 @@
 // @ts-check
 
 import mdx from '@astrojs/mdx';
+import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, fontProviders } from 'astro/config';
@@ -10,7 +11,7 @@ import { siteMetadata } from '@data/config/site';
 export default defineConfig({
   site: siteMetadata.siteUrl,
   trailingSlash: 'always',
-  integrations: [mdx(), sitemap()],
+  integrations: [mdx(), sitemap(), react()],
   markdown: {
     // https://docs.astro.build/en/reference/configuration-reference/#markdownshikiconfig
     shikiConfig: {

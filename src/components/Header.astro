@@ -1,6 +1,19 @@
 ---
-import { navigationLinks } from '@data/config/navigation';
+import { getCollection } from 'astro:content';
+import CmdkSearch from './cmdkSearch.tsx';
 import { siteMetadata } from '@data/config/site';
+
+const searchEnabled = siteMetadata.search.provider === 'cmdk';
+const posts = searchEnabled
+  ? (await getCollection('blog', ({ data }) => !data.draft))
+      .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+      .map(({ id, data }) => ({
+        href: `/blog/${id}/`,
+        title: data.title,
+        description: data.description ?? '',
+        tags: data.tags,
+      }))
+  : [];
 ---
 
 <header class="flex items-center justify-between" data-site-header transition:persist="site-header">
@@ -13,4 +26,14 @@ import { siteMetadata } from '@data/config/site';
       </div>
     </a>
   </div>
+  {
+    searchEnabled && (
+      <CmdkSearch
+        client:load
+        showTrigger={false}
+        posts={posts}
+        config={siteMetadata.search.cmdkConfig}
+      />
+    )
+  }
 </header>
