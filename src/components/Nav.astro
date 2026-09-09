@@ -20,8 +20,10 @@ const isCurrentTab = (href: string) => {
 
       return (
         <a
-          href={href}
+          href={isActive ? undefined : href}
           aria-current={isActive ? 'page' : undefined}
+          aria-disabled={isActive ? 'true' : undefined}
+          data-nav-tab
           class="relative shrink-0 pb-1 text-zinc-400 no-underline! hover:no-underline!"
         >
           {label}

@@ -13,6 +13,33 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let animation: gsap.core.Timeline | undefined;
 let preparedRoot: HTMLElement | null = null;
 let previousIndicator: { left: number; width: number } | undefined;
+let pendingNavigation: URL | undefined;
+
+// Capture clicks before ClientRouter can abort an in-flight navigation.
+document.addEventListener(
+  'click',
+  (event) => {
+    if (!(event.target instanceof Element)) return;
+    const tab = event.target.closest<HTMLAnchorElement>('a[data-nav-tab]');
+    if (!tab) return;
+    if (tab.getAttribute('aria-disabled') === 'true') {
+      event.preventDefault();
+      return;
+    }
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      (tab.target && tab.target !== '_self')
+    )
+      return;
+    if (tab.href === pendingNavigation?.href) event.preventDefault();
+  },
+  true,
+);
 
 const getRoot = () => document.querySelector<HTMLElement>('#main-container');
 const getItems = (root: HTMLElement) => [
@@ -124,6 +151,11 @@ function exit(signal: AbortSignal): Promise<void> {
 }
 
 document.addEventListener('astro:before-preparation', (event) => {
+  pendingNavigation = event.to;
+  const clearPending = () => {
+    if (pendingNavigation === event.to) pendingNavigation = undefined;
+  };
+  event.signal.addEventListener('abort', clearPending, { once: true });
   if (document.documentElement.dataset.pageMotion === 'exiting') {
     animation?.kill();
     const root = getRoot();
@@ -132,8 +164,16 @@ document.addEventListener('astro:before-preparation', (event) => {
   const load = event.loader;
   event.loader = async () => {
     // Keep the current page visible during network waits and failed/non-HTML navigations.
-    await load();
-    if (event.defaultPrevented || event.signal.aborted) return;
+    try {
+      await load();
+    } catch (error) {
+      clearPending();
+      throw error;
+    }
+    if (event.defaultPrevented || event.signal.aborted) {
+      clearPending();
+      return;
+    }
     const root = getRoot();
     const nextRoot = event.newDocument.querySelector<HTMLElement>('#main-container');
     if (root && nextRoot) {
@@ -158,7 +198,10 @@ document.addEventListener('astro:before-swap', (event) => {
   event.viewTransition.skipTransition();
 });
 
-document.addEventListener('astro:after-swap', prepare);
+document.addEventListener('astro:after-swap', () => {
+  pendingNavigation = undefined;
+  prepare();
+});
 document.addEventListener('astro:page-load', enter);
 
 reducedMotion.addEventListener('change', () => {
@@ -171,6 +214,7 @@ reducedMotion.addEventListener('change', () => {
 
 window.addEventListener('pageshow', (event) => {
   if (!event.persisted) return;
+  pendingNavigation = undefined;
   animation?.kill();
   const root = getRoot();
   if (root) restore(root);
