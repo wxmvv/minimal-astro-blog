@@ -1,93 +1,56 @@
-# Astro Starter Kit: Blog
+# Minimal Astro Blog
+
+A minimal blog and portfolio built with Astro, React, and Tailwind CSS.
+
+Markdown & MDX · Search · Dark mode · RSS · Giscus comments
+
+English · [简体中文](./README.zh-CN.md)
+
+## Start
+
+Requires Node.js 22.12.0+
 
 ```sh
-pnpm create astro@latest -- --template blog
+pnpm install
+pnpm dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Open `http://localhost:4321`.
 
-Features:
+## Make it yours
 
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and Open Graph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
+- [Site settings](./data/config/site.ts) — title, author, site URL, search, and comments.
+- [Navigation](./data/config/navigation.ts) and [projects](./data/config/projects.ts).
+- [About page](./data/about/about.md).
 
-## 🚀 Project Structure
+Replace the sample content and set `siteMetadata.siteUrl` to your domain. For comments, fill in `comments.giscusConfig` or set `comments.provider` to `''` to disable them.
 
-Inside of your Astro project, you'll see the following folders and files:
+## Write
 
-```text
-├── public/
-├── src/
-│   ├── assets/
-│   ├── components/
-│   ├── content/
-│   ├── layouts/
-│   └── pages/
-├── astro.config.mjs
-├── README.md
-├── package.json
-└── tsconfig.json
+Add a Markdown or MDX file to `data/blog/`:
+
+```md
+---
+title: "Hello, world"
+pubDate: "2026-09-09"
+homepage: true
+---
+
+A fresh start.
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+Use `draft: true` to keep a post unpublished. Add `homepageMedia` for an image or video preview. See the [content schema](./src/content.config.ts) for more options.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Deploy
 
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## Homepage preview media
-
-Posts with `homepage: true` can use a single image or video path for `homepageMedia`:
-
-```yaml
-homepageMedia: "../assets/work.jpg"
+```sh
+pnpm build
 ```
 
-To switch images with the system color scheme, supply both image paths:
+Publish `dist/` to your static host. Run `pnpm preview` to preview locally.
 
-```yaml
-homepageMedia:
-  light: "../assets/work-light.png"
-  dark: "../assets/work-dark.png"
-```
+---
 
-Paths are relative to the post file. Both `light` and `dark` are required for this
-form and must reference images. Matching dimensions and composition are recommended
-to keep the preview stable when the theme changes. Single images and videos are
-shared by both themes; omitting `homepageMedia` disables the preview.
+Built on the Astro blog starter. Inspired by [nelson](https://nelson.co/)
 
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                | Action                                           |
-| :--------------------- | :----------------------------------------------- |
-| `pnpm install`         | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-
-## Credit
-
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
-
-## TODO
-
-- [ ] i18n
-- [ ] light/dark theme
-- [ ] gsap
-- [ ] search
-- [ ] rss
-- [ ] liquid glass
+The old nextjs version is [here](https://github.com/wxmvv/minimal-tailwind-nextjs-blog).
