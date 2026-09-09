@@ -21,7 +21,13 @@ const blog = defineCollection({
       homepage: blankAsMissing(z.boolean().default(false)),
       homepageOrder: blankAsMissing(z.number().optional()),
       homepageMedia: blankAsMissing(
-        z.union([z.string().regex(/^\.{1,2}\/.*\.(mp4|webm|ogg)$/i), image()]).optional(),
+        z
+          .union([
+            z.string().regex(/^\.{1,2}\/.*\.(mp4|webm|ogg)$/i),
+            image(),
+            z.object({ light: image(), dark: image() }),
+          ])
+          .optional(),
       ),
     }),
 });

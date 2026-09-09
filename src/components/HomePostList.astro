@@ -1,6 +1,6 @@
 ---
 import { posix } from 'node:path';
-import { Image } from 'astro:assets';
+import { getImage, Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
@@ -15,6 +15,12 @@ const videos = import.meta.glob<string>('/data/**/*.{mp4,webm,ogg,MP4,WEBM,OGG}'
 const previews = await Promise.all(
   posts.map(async (post) => {
     const media = post.data.homepageMedia;
+    if (media && typeof media !== 'string' && 'light' in media) {
+      return {
+        light: media.light,
+        dark: await getImage({ src: media.dark, widths: [484, 968] }),
+      };
+    }
     if (typeof media !== 'string') return media;
 
     const path = posix.join('/', posix.dirname(post.filePath ?? ''), media);
@@ -69,6 +75,17 @@ const previews = await Promise.all(
           <div class="preview" data-preview-index={index}>
             {typeof media === 'string' ? (
               <video src={media} muted loop playsinline preload="metadata" />
+            ) : 'light' in media ? (
+              <picture style="display: contents">
+                <source
+                  media="(prefers-color-scheme: dark)"
+                  srcset={media.dark.srcSet.attribute || media.dark.src}
+                  sizes="484px"
+                  width={media.dark.attributes.width}
+                  height={media.dark.attributes.height}
+                />
+                <Image src={media.light} alt="" widths={[484, 968]} sizes="484px" loading="eager" />
+              </picture>
             ) : (
               <Image src={media} alt="" widths={[484, 968]} sizes="484px" loading="eager" />
             )}

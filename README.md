@@ -41,6 +41,27 @@ The `src/content/` directory contains "collections" of related Markdown and MDX 
 
 Any static assets, like images, can be placed in the `public/` directory.
 
+## Homepage preview media
+
+Posts with `homepage: true` can use a single image or video path for `homepageMedia`:
+
+```yaml
+homepageMedia: "../assets/work.jpg"
+```
+
+To switch images with the system color scheme, supply both image paths:
+
+```yaml
+homepageMedia:
+  light: "../assets/work-light.png"
+  dark: "../assets/work-dark.png"
+```
+
+Paths are relative to the post file. Both `light` and `dark` are required for this
+form and must reference images. Matching dimensions and composition are recommended
+to keep the preview stable when the theme changes. Single images and videos are
+shared by both themes; omitting `homepageMedia` disables the preview.
+
 ## 🧞 Commands
 
 All commands are run from the root of the project, from a terminal:
