@@ -92,13 +92,16 @@ pre > code {
   all: unset;
 }
 
-.astro-code,
+/*.astro-code,
 .astro-code span {
   font-size: 13px;
   @variant dark {
     color: var(--shiki-dark);
     background-color: var(--shiki-dark-bg);
   }
+}*/
+.expressive-code .frame pre::before {
+  @apply text-sm text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-800 font-bold capitalize;
 }
 
 blockquote {

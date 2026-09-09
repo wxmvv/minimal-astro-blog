@@ -7,20 +7,24 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, fontProviders } from 'astro/config';
 import { siteMetadata } from '@data/config/site';
 
+import expressiveCode from 'astro-expressive-code';
+import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers';
+import { pluginLanguageBadge } from 'expressive-code-language-badge';
+
 // https://astro.build/config
 export default defineConfig({
   site: siteMetadata.siteUrl,
   trailingSlash: 'always',
-  integrations: [mdx(), sitemap(), react()],
-  markdown: {
-    // https://docs.astro.build/en/reference/configuration-reference/#markdownshikiconfig
-    shikiConfig: {
-      themes: {
-        light: 'github-light',
-        dark: 'github-dark',
-      },
-    },
-  },
+  integrations: [
+    expressiveCode({
+      themes: ['one-dark-pro', 'one-light'], // dark light
+      plugins: [pluginLineNumbers(), pluginLanguageBadge()],
+    }),
+    mdx(),
+    sitemap(),
+    react(),
+  ],
+  markdown: {},
   vite: {
     plugins: [tailwindcss()],
   },
