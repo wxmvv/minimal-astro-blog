@@ -13,6 +13,7 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let animation: gsap.core.Timeline | undefined;
 let upperAnimation: gsap.core.Timeline | undefined;
 let indicatorAnimation: gsap.core.Tween | undefined;
+let waitForUpperEntrance = false;
 const preparedUpper = new WeakSet<HTMLElement>();
 let preparedRoot: HTMLElement | null = null;
 let previousIndicator: { left: number; width: number } | undefined;
@@ -60,6 +61,7 @@ function restore(root: HTMLElement) {
 }
 
 function prepare() {
+  waitForUpperEntrance = false;
   exitAnimation = undefined;
   animation?.kill();
   preparedRoot = getRoot();
@@ -82,6 +84,7 @@ function prepare() {
             0.1 + index * 0.18,
           );
         });
+        waitForUpperEntrance = true;
       }
     }
   }
@@ -123,10 +126,17 @@ function enter() {
   animation?.kill();
   const container = getContainer(root);
   const timeline = gsap.timeline({
+    // First visit reveals the shared header first. Tab swaps reuse it and start immediately.
+    // Both paths use exactly the same content tweens below.
+    delay:
+      waitForUpperEntrance && upperAnimation
+        ? Math.max(0, upperAnimation.totalDuration() - upperAnimation.time() - 0.6)
+        : 0,
     onComplete: () => {
       restore(root);
     },
   });
+  waitForUpperEntrance = false;
   animation = timeline;
   if (root.dataset.motionProfile === 'list') {
     timeline.to(
