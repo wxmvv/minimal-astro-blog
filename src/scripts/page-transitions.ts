@@ -14,6 +14,7 @@ let animation: gsap.core.Timeline | undefined;
 let preparedRoot: HTMLElement | null = null;
 let previousIndicator: { left: number; width: number } | undefined;
 let pendingNavigation: URL | undefined;
+let exitAnimation: { root: HTMLElement; finished: Promise<void> } | undefined;
 
 // Capture clicks before ClientRouter can abort an in-flight navigation.
 document.addEventListener(
@@ -57,6 +58,7 @@ function restore(root: HTMLElement) {
 }
 
 function prepare() {
+  exitAnimation = undefined;
   animation?.kill();
   preparedRoot = getRoot();
   if (!preparedRoot) return;
@@ -74,16 +76,24 @@ function prepare() {
 
 function enter() {
   const root = getRoot();
-  if (!root) return;
+  if (!root) {
+    pendingNavigation = undefined;
+    return;
+  }
   if (root !== preparedRoot) prepare();
   if (reducedMotion.matches) {
+    pendingNavigation = undefined;
     restore(root);
     previousIndicator = undefined;
     return;
   }
   animation?.kill();
   const container = getContainer(root);
-  const timeline = gsap.timeline({ onComplete: () => restore(root) });
+  const timeline = gsap.timeline({
+    onComplete: () => {
+      restore(root);
+    },
+  });
   animation = timeline;
   if (root.dataset.motionProfile === 'list') {
     timeline.to(
@@ -125,22 +135,16 @@ function enter() {
 function exit(signal: AbortSignal): Promise<void> {
   const root = getRoot();
   if (!root || signal.aborted || reducedMotion.matches) return Promise.resolve();
+  // A newer destination shares the outgoing animation, even if it has already finished.
+  if (exitAnimation?.root === root) return exitAnimation.finished;
   animation?.kill();
   const container = getContainer(root);
   document.documentElement.dataset.pageMotion = 'exiting';
   document.dispatchEvent(new Event('site:motion-start'));
 
-  return new Promise((resolve) => {
-    const finish = () => {
-      signal.removeEventListener('abort', abort);
-      resolve();
-    };
+  const finished = new Promise<void>((resolve) => {
+    const finish = () => resolve();
     const timeline = gsap.timeline({ onComplete: finish, onInterrupt: finish });
-    const abort = () => {
-      timeline.kill();
-      if (root === getRoot()) restore(root);
-    };
-    signal.addEventListener('abort', abort, { once: true });
     animation = timeline;
     // The reference has no exit variant; reverse its item transition before the DOM swap.
     timeline
@@ -148,6 +152,8 @@ function exit(signal: AbortSignal): Promise<void> {
       .to(container, { opacity: 0, duration: 0.4, ease: tweenEase }, 0)
       .to(container, { filter: 'blur(8px)', duration: 0.4, ease: blurEase }, 0);
   });
+  exitAnimation = { root, finished };
+  return finished;
 }
 
 document.addEventListener('astro:before-preparation', (event) => {
@@ -156,11 +162,6 @@ document.addEventListener('astro:before-preparation', (event) => {
     if (pendingNavigation === event.to) pendingNavigation = undefined;
   };
   event.signal.addEventListener('abort', clearPending, { once: true });
-  if (document.documentElement.dataset.pageMotion === 'exiting') {
-    animation?.kill();
-    const root = getRoot();
-    if (root) restore(root);
-  }
   const load = event.loader;
   event.loader = async () => {
     // Keep the current page visible during network waits and failed/non-HTML navigations.
@@ -168,10 +169,18 @@ document.addEventListener('astro:before-preparation', (event) => {
       await load();
     } catch (error) {
       clearPending();
+      if (!event.signal.aborted) {
+        exitAnimation = undefined;
+        enter();
+      }
       throw error;
     }
     if (event.defaultPrevented || event.signal.aborted) {
       clearPending();
+      if (!event.signal.aborted) {
+        exitAnimation = undefined;
+        enter();
+      }
       return;
     }
     const root = getRoot();
@@ -182,9 +191,11 @@ document.addEventListener('astro:before-preparation', (event) => {
         root.querySelector('[data-site-title]') && nextRoot.querySelector('[data-site-title]')
           ? 'tab'
           : 'page';
-      animation?.kill();
-      restore(root);
-      root.dataset.motionScope = nextRoot.dataset.motionScope = scope;
+      // Preserve the current animation's container and inline values when interrupted.
+      if (document.documentElement.dataset.pageMotion === 'idle') {
+        root.dataset.motionScope = scope;
+      }
+      nextRoot.dataset.motionScope = scope;
     }
     await exit(event.signal);
   };
