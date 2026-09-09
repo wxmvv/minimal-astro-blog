@@ -5,8 +5,12 @@ import RssButton from '@/components/RssButton.astro';
 
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 
-const isCurrentTab = (href: string) =>
-  href === '/' ? currentPath === href : currentPath === href || currentPath.startsWith(`${href}/`);
+const isCurrentTab = (href: string) => {
+  const targetPath = href.replace(/\/$/, '') || '/';
+  return targetPath === '/'
+    ? currentPath === targetPath
+    : currentPath === targetPath || currentPath.startsWith(`${targetPath}/`);
+};
 ---
 
 <nav class="flex gap-6" aria-label="Primary navigation" data-motion-item>

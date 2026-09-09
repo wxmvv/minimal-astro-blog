@@ -9,6 +9,7 @@ import { siteMetadata } from '@data/config/site';
 // https://astro.build/config
 export default defineConfig({
   site: siteMetadata.siteUrl,
+  trailingSlash: 'always',
   integrations: [mdx(), sitemap()],
   markdown: {
     // https://docs.astro.build/en/reference/configuration-reference/#markdownshikiconfig
