@@ -106,7 +106,7 @@ const previews = await Promise.all(
       this.cleanup?.();
       const background = this.querySelector<HTMLElement>('.hover-background')!;
       const glass = this.querySelector<HTMLElement>('.hover-glass')!;
-      const glassEffect = createLiquidGlass(glass, { edgeWidth: 12, refraction: 300 });
+      const glassEffect = createLiquidGlass(glass, { edgeWidth: 10, refraction: 30 });
       const previewLayer = this.querySelector<HTMLElement>('.previews')!;
       const links = [...this.querySelectorAll<HTMLAnchorElement>('[data-post-index]')];
       const previews = [...this.querySelectorAll<HTMLElement>('[data-preview-index]')];
