@@ -1,0 +1,17 @@
+---
+import type { InferGetStaticPropsType } from 'astro';
+import BlogList from '@/components/BlogList.astro';
+import { getBlogPages } from '@/utils/blog-pagination';
+
+export async function getStaticPaths() {
+  const pages = await getBlogPages();
+  return pages.slice(1).map((page) => ({
+    params: { page: String(page.currentPage) },
+    props: page,
+  }));
+}
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+---
+
+<BlogList {...Astro.props} />

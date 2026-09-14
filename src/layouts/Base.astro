@@ -7,9 +7,10 @@ import PageTransitions from '@/components/PageTransitions.astro';
 
 interface Props {
   meta?: PageMeta;
+  motionProfile?: 'list' | 'stagger';
 }
 
-const { meta = {} } = Astro.props;
+const { meta = {}, motionProfile = 'stagger' } = Astro.props;
 ---
 
 <!doctype html>
@@ -22,10 +23,7 @@ const { meta = {} } = Astro.props;
   <body>
     <div id="body-container">
       <Header />
-      <div
-        id="main-container"
-        data-motion-profile={Astro.url.pathname.replace(/\/$/, '') === '/blog' ? 'list' : 'stagger'}
-      >
+      <div id="main-container" data-motion-profile={motionProfile}>
         <slot />
       </div>
       <Footer />

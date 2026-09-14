@@ -1,0 +1,87 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { pageMetadata } from '@data/config/site';
+import { blogPageUrl } from '@/utils/blog-pagination';
+import FormattedDate from '@/components/FormattedDate.astro';
+import Nav from '@/components/Nav.astro';
+import SiteTitle from '@/components/SiteTitle.astro';
+import BaseLayout from '@/layouts/Base.astro';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+  currentPage: number;
+  totalPages: number;
+}
+const { posts, currentPage, totalPages } = Astro.props;
+---
+
+<BaseLayout
+  meta={{
+    ...pageMetadata.blog,
+    title: currentPage === 1 ? pageMetadata.blog.title : `Blog - Page ${currentPage}`,
+  }}
+  motionProfile="list"
+>
+  <SiteTitle />
+  <Nav />
+  <main class="section-g12">
+    <ul class="section-g6">
+      {
+        posts.map((post) => {
+          const { tags } = post.data;
+
+          return (
+            <li>
+              <article class="section-g2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  <FormattedDate date={post.data.pubDate} />
+                </p>
+
+                <div class="section-g0">
+                  <h2 class="inline-block font-medium">
+                    <a
+                      href={`/blog/${post.id}/`}
+                      class="text-gray-900 underline decoration-gray-300 underline-offset-4 hover:decoration-gray-800 dark:text-gray-100 dark:decoration-gray-500 dark:hover:decoration-gray-200"
+                    >
+                      {post.data.title}
+                    </a>
+                  </h2>
+
+                  {tags.length > 0 && (
+                    <p class="flex flex-wrap gap-x-1 text-sm text-gray-400">
+                      {tags.map((tag) => (
+                        <span>{tag.split(' ').join('-')}</span>
+                      ))}
+                    </p>
+                  )}
+
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{post.data.description}</p>
+                </div>
+              </article>
+            </li>
+          );
+        })
+      }
+    </ul>
+    {posts.length === 0 && <p>No posts found.</p>}
+    {
+      totalPages > 1 && (
+        <nav aria-label="Blog pagination" class="flex items-center gap-4">
+          {currentPage > 1 && (
+            <a href={blogPageUrl(currentPage - 1)} rel="prev">
+              Previous
+            </a>
+          )}
+          <span aria-current="page">
+            Page {currentPage} of {totalPages}
+          </span>
+          {currentPage < totalPages && (
+            <a href={blogPageUrl(currentPage + 1)} rel="next">
+              Next
+            </a>
+          )}
+        </nav>
+      )
+    }
+  </main>
+</BaseLayout>
