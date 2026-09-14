@@ -16,7 +16,14 @@ const description = meta.description ?? siteMetadata.description;
 // const image = meta.image ?? FallbackImage;
 const image = meta.image;
 const imageURL = image ? new URL(image, siteURL) : undefined;
+const umami = siteMetadata.analytics.umamiAnalytics;
 ---
+
+{
+  import.meta.env.PROD && umami.umamiWebsiteId && (
+    <script is:inline defer src={umami.src} data-website-id={umami.umamiWebsiteId} />
+  )
+}
 
 <!-- Global Metadata -->
 <meta charset="utf-8" />
