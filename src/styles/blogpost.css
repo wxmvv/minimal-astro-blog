@@ -48,7 +48,7 @@ b {
 }
 
 a {
-  @apply underline relative inline-block transition-colors duration-300 will-change-transform underline-offset-2;
+  @apply underline inline-block transition-colors duration-300 will-change-transform underline-offset-2;
   text-decoration-color: #eeeff2;
   text-decoration-thickness: 2px;
 }

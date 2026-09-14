@@ -53,7 +53,7 @@ const previews = await Promise.all(
                 <span class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-zinc-400">
                   <time datetime={pubDate.toISOString()}>{pubDate.getUTCFullYear()}</time>
                   {tags.length > 0 && (
-                    <span class="flex flex-wrap gap-x-1 font-medium">
+                    <span class="flex flex-wrap gap-x-1">
                       {tags.map((tag) => (
                         <span>{tag.split(' ').join('-')}</span>
                       ))}

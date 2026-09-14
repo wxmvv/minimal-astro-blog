@@ -1,0 +1,55 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { slug } from 'github-slugger';
+import FormattedDate from '@/components/FormattedDate.astro';
+import Nav from '@/components/Nav.astro';
+import SiteTitle from '@/components/SiteTitle.astro';
+import BaseLayout from '@/layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+  );
+  const tags = new Set(posts.flatMap((post) => post.data.tags.map((tag) => slug(tag))));
+
+  return [...tags].map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: posts.filter((post) => post.data.tags.some((value) => slug(value) === tag)),
+    },
+  }));
+}
+
+interface Props {
+  tag: string;
+  posts: CollectionEntry<'blog'>[];
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout meta={{ title: tag, description: `Posts tagged ${tag}.` }}>
+  <SiteTitle />
+  <Nav />
+  
+  <main class="section-g6 relative">
+    <a class="text-zz" href="/tags/">All tags</a>
+    <div class="text-zz">{tag} ({posts.length})</div>
+    <ul class="section-g4">
+      {
+        posts.map((post) => (
+          <li>
+            <article>
+              <h2>
+                <a href={`/blog/${post.id}/`}>{post.data.title}</a>
+              </h2>
+              <!-- <FormattedDate date={post.data.pubDate} /> -->
+              <!-- {post.data.description && <p>{post.data.description}</p>} -->
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+</BaseLayout>

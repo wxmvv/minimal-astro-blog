@@ -1,0 +1,44 @@
+---
+import { getCollection } from 'astro:content';
+import { slug } from 'github-slugger';
+import { pageMetadata } from '@data/config/site';
+import Nav from '@/components/Nav.astro';
+import SiteTitle from '@/components/SiteTitle.astro';
+import BaseLayout from '@/layouts/Base.astro';
+
+const posts = await getCollection('blog', ({ data }) => !data.draft);
+const tagCounts = new Map<string, number>();
+
+for (const post of posts) {
+  for (const tag of post.data.tags) {
+    const formattedTag = slug(tag);
+    tagCounts.set(formattedTag, (tagCounts.get(formattedTag) ?? 0) + 1);
+  }
+}
+
+const sortedTags = [...tagCounts].sort((a, b) => b[1] - a[1]);
+---
+
+<BaseLayout meta={pageMetadata.tags}>
+  <SiteTitle />
+  <Nav />
+  <main class="section-g6 relative">
+    <!-- <a class="text-zz absolute -top-8" href="/tags/">All tags</a> -->
+    <div class="text-zz">Tags</div>
+    {
+      sortedTags.length === 0 ? (
+        <p>No tags found.</p>
+      ) : (
+        <ul class="section-g4">
+          {sortedTags.map(([tag, count]) => (
+            <li>
+              <a href={`/tags/${encodeURIComponent(tag)}/`}>
+                {tag} ({count})
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </main>
+</BaseLayout>

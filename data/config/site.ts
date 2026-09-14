@@ -96,6 +96,10 @@ export const pageMetadata = {
     title: 'Blog',
     description: 'All published posts.',
   },
+  tags: {
+    title: 'Tags',
+    description: 'Things I blog about',
+  },
   about: {
     title: 'About',
     description: `About ${siteMetadata.author}.`,
