@@ -13,7 +13,7 @@ const isCurrentTab = (href: string) => {
 };
 ---
 
-<nav class="flex gap-6" aria-label="Primary navigation" data-motion-item>
+<nav class="flex gap-6" aria-label="Primary navigation" data-site-nav data-motion-item>
   {
     navigationLinks.map(({ href, label }) => {
       const isActive = isCurrentTab(href);
@@ -28,7 +28,10 @@ const isCurrentTab = (href: string) => {
         >
           {label}
           {isActive && (
-            <span data-nav-indicator class="cursor-pointer select-none absolute inset-x-0 -bottom-px h-0.5 bg-zinc-200" />
+            <span
+              data-nav-indicator
+              class="cursor-pointer select-none absolute inset-x-0 -bottom-px h-0.5 bg-zinc-200"
+            />
           )}
         </a>
       );

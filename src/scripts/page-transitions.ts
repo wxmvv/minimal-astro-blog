@@ -68,7 +68,9 @@ function prepare() {
   if (!preparedRoot) return;
   if (preparedRoot.querySelector('[data-site-title]')) {
     preparedRoot.dataset.motionScope = 'tab';
-    const upper = [...preparedRoot.querySelectorAll<HTMLElement>('[data-site-title], nav')];
+    const upper = [
+      ...preparedRoot.querySelectorAll<HTMLElement>('[data-site-title], [data-site-nav]'),
+    ];
     if (upper.some((item) => !preparedUpper.has(item))) {
       upperAnimation?.kill();
       upper.forEach((item) => preparedUpper.add(item));
@@ -110,7 +112,7 @@ function enter() {
   // Client-side navigations still animate: after-swap prepares their root before enter().
   if (root !== preparedRoot && document.documentElement.dataset.pageMotion === 'idle') {
     preparedRoot = root;
-    root.querySelectorAll<HTMLElement>('[data-site-title], nav').forEach((item) => {
+    root.querySelectorAll<HTMLElement>('[data-site-title], [data-site-nav]').forEach((item) => {
       preparedUpper.add(item);
     });
     restore(root);
@@ -254,14 +256,14 @@ document.addEventListener('astro:before-swap', (event) => {
   const nextRoot = event.newDocument.querySelector<HTMLElement>('#main-container');
   if (root?.querySelector('[data-site-title]') && nextRoot?.querySelector('[data-site-title]')) {
     // Keep the actual animated nodes alive while Astro replaces the page body.
-    for (const selector of ['[data-site-title]', 'nav']) {
+    for (const selector of ['[data-site-title]', '[data-site-nav]']) {
       const current = root.querySelector<HTMLElement>(selector);
       const next = nextRoot.querySelector<HTMLElement>(selector);
       if (!current || !next) continue;
       current.setAttribute('data-astro-transition-persist', selector);
       next.setAttribute('data-astro-transition-persist', selector);
       // The navigation shell persists, but its links must reflect the new current tab.
-      if (selector === 'nav') current.replaceChildren(...next.childNodes);
+      if (selector === '[data-site-nav]') current.replaceChildren(...next.childNodes);
     }
   }
   // Skipping our own native snapshot transition intentionally rejects its ready promise.
