@@ -1,0 +1,80 @@
+---
+title: "MDX：图片、视频与双列布局"
+description: "使用本地媒体和 Astro Image 组件，演示正文图片、可控视频与响应式双列布局。"
+pubDate: "2026-09-11"
+tags: ["写作", "MDX", "媒体"]
+comments: false
+homepage: true
+homepageMedia: "../assets/work.jpg"
+---
+
+import { Image } from "astro:assets";
+import workImage from "../assets/work.jpg";
+import coverImage from "../assets/blog-placeholder-5.jpg";
+import testVideo from "../assets/video/test_video.mp4";
+
+MDX 可以在 Markdown 正文中导入资源并使用组件。本页媒体来自项目本地，无需第三方播放器就能浏览示例。
+
+## 本地图片
+
+下面使用导入的图片，由 Astro 处理图片尺寸与输出资源：
+
+```mdx
+import { Image } from "astro:assets";
+import workImage from "../assets/work.jpg";
+
+<Image src={workImage} alt="工作展示示例" loading="lazy" />
+```
+
+<Image src={workImage} alt="工作展示示例，用于演示正文图片" loading="lazy" />
+
+## 本地视频
+
+正文视频提供播放控件，读者自行决定何时播放。`preload="metadata"` 用于优先读取视频元信息。
+
+```mdx
+import testVideo from "../assets/video/test_video.mp4";
+
+<video controls playsInline preload="metadata" aria-label="本地视频示例">
+  <source src={testVideo} type="video/mp4" />
+</video>
+```
+
+<video controls playsInline preload="metadata" class="w-full rounded" aria-label="本地视频示例">
+  <source src={testVideo} type="video/mp4" />
+  你的浏览器不支持视频播放。
+</video>
+
+<a href={testVideo}>下载或打开这段视频</a>
+
+## 响应式双列
+
+宽屏并排展示两张图片，窄屏自动回到单列，适合放作品对照或过程记录。
+
+```html
+<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+  <!-- 放入两张图片或两个内容块 -->
+</div>
+```
+
+<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+  <figure class="my-0">
+    <Image src={workImage} alt="双列布局中的工作展示图片" loading="lazy" class="my-0 rounded" />
+    <figcaption>第一列：作品展示。</figcaption>
+  </figure>
+  <figure class="my-0">
+    <Image src={coverImage} alt="双列布局中的模板示例配图" loading="lazy" class="my-0 rounded" />
+    <figcaption>第二列：补充配图。</figcaption>
+  </figure>
+</div>
+
+## 折叠补充说明
+
+<details>
+  <summary>什么时候应该使用 MDX？</summary>
+  <p>
+    需要导入媒体、使用组件或编排布局时选择 MDX。只有文字、列表与图片的文章，普通 Markdown 就足够。
+  </p>
+</details>
+
+首页的视频预览与正文播放器分别配置，详见[首页视频示例](/blog/homepage-video-preview/)。

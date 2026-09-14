@@ -41,6 +41,8 @@ homepage: true
 
 使用 `draft: true` 将文章设为草稿。添加 `homepageMedia` 可展示图片或视频预览。更多选项见[内容结构定义](./src/content.config.ts)。
 
+模板包含 12 篇公开功能示例和 1 篇草稿。从[功能导览](./data/blog/template-overview.md)开始，查看 Markdown 排版、代码块、MDX 媒体、首页预览、主题、目录、搜索、标签、分页、RSS 和评论配置。运行网站后打开 `/blog/` 浏览，或打开 `/blog/page/2/` 体验分页；[草稿示例](./data/blog/draft-example.md)不会生成公开页面。
+
 ## 部署
 
 ```sh

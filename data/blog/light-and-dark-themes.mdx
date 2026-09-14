@@ -1,0 +1,53 @@
+---
+title: "深浅色主题：让图片跟随系统外观"
+description: "演示首页成对预览图片与正文主题图片，观察模板如何响应系统的深浅色偏好。"
+pubDate: "2026-09-08"
+tags: ["首页", "主题", "MDX"]
+comments: false
+homepage: true
+homepageMedia:
+  light: "../assets/astro-logomark-light.png"
+  dark: "../assets/astro-logomark-dark.png"
+---
+
+import { Image } from "astro:assets";
+import logoOnLight from "../assets/astro-logo-dark.png";
+import logoOnDark from "../assets/astro-logo-light.png";
+
+模板使用系统的深浅色偏好调整外观。在系统设置中切换外观，可以观察页面背景、文字、代码块和本页图片。
+
+## 正文主题图片
+
+<div class="flex justify-center">
+  <Image
+    src={logoOnLight}
+    alt="浅色背景上的 Astro 标志"
+    class="my-0 rounded dark:hidden"
+    loading="lazy"
+  />
+  <Image
+    src={logoOnDark}
+    alt="深色背景上的 Astro 标志"
+    class="my-0 hidden rounded dark:block"
+    loading="lazy"
+  />
+</div>
+
+同一张透明图片可能无法兼顾两种背景。这里导入两份已有的 Astro 标志资源，使用 `dark:hidden` 与 `hidden dark:block` 切换展示。
+
+## 首页主题预览
+
+```yaml
+homepage: true
+homepageMedia:
+  light: "../assets/astro-logomark-light.png"
+  dark: "../assets/astro-logomark-dark.png"
+```
+
+`light` 对应浅色模式，`dark` 对应深色模式。回到[首页](/)，聚焦本文链接，再切换系统外观即可比较。
+
+## 从重构记录到可复用示例
+
+这个项目由原先的 Next.js 博客重构而来。Astro 版本保留简洁的文字首页，并把媒体预览、Markdown 和 MDX 写作整理为可以直接替换的内容结构。
+
+使用模板时，可以将本页标志换成自己的品牌图片。如果两种主题都适用同一张图片，把 `homepageMedia` 写成单个路径即可。

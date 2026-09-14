@@ -1,214 +1,74 @@
 ---
-title: "Markdown Style Guide"
-description: "Here is a sample of some basic Markdown syntax that can be used when writing Markdown content in Astro."
-pubDate: "Jun 19 2024"
+title: "Markdown 排版：从段落到表格"
+description: "一篇可直接参考的 Markdown 样式样本，展示标题层级、引用、任务列表、表格、图片和脚注。"
+pubDate: "2026-09-13"
+tags: ["写作", "Markdown"]
+comments: false
 heroImage: "../assets/blog-placeholder-1.jpg"
+homepage: true
 ---
 
-Here is a sample of some basic Markdown syntax that can be used when writing Markdown content in Astro.
+Markdown 适合以文字为主的文章。这里把常用语法放在同一页，方便检查中文、English、数字 123 与 `inline code` 混排时的阅读效果。
 
-## Headings
+## 段落与强调
 
-The following HTML `<h1>`—`<h6>` elements represent six levels of section headings. `<h1>` is the highest section level while `<h6>` is the lowest.
+好的段落围绕一个主题展开。正文中的 **粗体** 用来强调重点，_斜体_ 可以标记术语，~~删除线~~ 表示已经废弃的内容。段落之间保留空行即可。
 
-# H1
+这是一条[站内链接](/blog/template-overview/)。下面的引用可以用作文章中的提示：
 
-## H2
+> 先写清楚内容，再决定它需要怎样的排版。
+>
+> 引用里也可以使用 **强调** 和 `代码`。
 
-### H3
+## 标题层级
 
-#### H4
+文章标题由 frontmatter 的 `title` 提供，正文通常从二级标题开始。
 
-##### H5
+### 三级标题
 
-###### H6
+用于划分当前章节内的小主题。
 
-## Paragraph
+#### 四级标题
 
-Xerum, quo qui aut unt expliquam qui dolut labo. Aque venitatiusda cum, voluptionse latur sitiae dolessi aut parist aut dollo enim qui voluptate ma dolestendit peritin re plis aut quas inctum laceat est volestemque commosa as cus endigna tectur, offic to cor sequas etum rerum idem sintibus eiur? Quianimin porecus evelectur, cum que nis nust voloribus ratem aut omnimi, sitatur? Quiatem. Nam, omnis sum am facea corem alique molestrunt et eos evelece arcillit ut aut eos eos nus, sin conecerem erum fuga. Ri oditatquam, ad quibus unda veliamenimin cusam et facea ipsamus es exerum sitate dolores editium rerore eost, temped molorro ratiae volorro te reribus dolorer sperchicium faceata tiustia prat.
+用于补充细节。目录优先收集二级标题，避免把所有小标题都塞进导航。
 
-Itatur? Quiatae cullecum rem ent aut odis in re eossequodi nonsequ idebis ne sapicia is sinveli squiatum, core et que aut hariosam ex eat.
+## 列表与任务
 
-## Images
+1. 在 `data/blog/` 创建文章。
+2. 填写标题、发布日期与摘要。
+3. 预览后再发布。
 
-### Syntax
+- 文字内容使用 Markdown。
+- 需要导入媒体或编排布局时使用 MDX。
+- 用标签把相近主题组织起来。
 
-```markdown
-![Alt text](./full/or/relative/path/of/image)
-```
+下面是静态任务清单，复选框的状态由文章源文件决定：
 
-### Output
+- [x] 准备正文
+- [x] 添加图片说明
+- [ ] 换成自己的内容
 
-![blog placeholder](../assets/blog-placeholder-about.jpg)
+## 表格
 
-## Blockquotes
+| 内容     | 写法            | 适用场景     |
+| :------- | :-------------- | :----------- |
+| 加粗     | `**重点**`      | 关键结论     |
+| 行内代码 | 单个反引号      | 文件名或变量 |
+| 链接     | `[文字](地址)`  | 延伸阅读     |
+| 图片     | `![说明](路径)` | 截图或配图   |
 
-The blockquote element represents content that is quoted from another source, optionally with a citation which must be within a `footer` or `cite` element, and optionally with in-line changes such as annotations and abbreviations.
+## 图片
 
-### Blockquote without attribution
+![模板自带的文章配图，用于演示正文图片的宽度与圆角](../assets/blog-placeholder-about.jpg)
 
-#### Syntax
+图片使用相对于当前文章的本地路径。需要双列或更宽的展示时，参考 [MDX 图文布局](/blog/mdx-media-and-layouts/)。
 
-```markdown
-> Tiam, ad mint andaepu dandae nostion secatur sequo quae.  
-> **Note** that you can use _Markdown syntax_ within a blockquote.
-```
+## 脚注与分隔线
 
-#### Output
+脚注适合补充不影响主线阅读的说明。[^note]
 
-> Tiam, ad mint andaepu dandae nostion secatur sequo quae.  
-> **Note** that you can use _Markdown syntax_ within a blockquote.
+---
 
-### Blockquote with attribution
+分隔线可以标记内容的转折，但通常一个清晰的小标题就足够了。
 
-#### Syntax
-
-```markdown
-> Don't communicate by sharing memory, share memory by communicating.<br>
-> — <cite>Rob Pike[^1]</cite>
-```
-
-#### Output
-
-> Don't communicate by sharing memory, share memory by communicating.<br>
-> — <cite>Rob Pike[^1]</cite>
-
-[^1]: The above quote is excerpted from Rob Pike's [talk](https://www.youtube.com/watch?v=PAAkCSZUG1c) during Gopherfest, November 18, 2015.
-
-## Tables
-
-### Syntax
-
-```markdown
-| Italics   | Bold     | Code   |
-| --------- | -------- | ------ |
-| _italics_ | **bold** | `code` |
-```
-
-### Output
-
-| Italics   | Bold     | Code   |
-| --------- | -------- | ------ |
-| _italics_ | **bold** | `code` |
-
-## Code Blocks
-
-### Syntax
-
-we can use 3 backticks ``` in new line and write snippet and close with 3 backticks on new line and to highlight language specific syntax, write one word of language name after first 3 backticks, for eg. html, javascript, css, markdown, typescript, txt, bash
-
-````markdown
-```html
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Example HTML5 Document</title>
-  </head>
-  <body>
-    <p>Test</p>
-  </body>
-</html>
-```
-````
-
-### Output
-
-```html
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Example HTML5 Document</title>
-  </head>
-  <body>
-    <p>Test</p>
-  </body>
-</html>
-```
-
-## List Types
-
-### Ordered List
-
-#### Syntax
-
-```markdown
-1. First item
-2. Second item
-3. Third item
-```
-
-#### Output
-
-1. First item
-2. Second item
-3. Third item
-
-### Unordered List
-
-#### Syntax
-
-```markdown
-- List item
-- Another item
-- And another item
-```
-
-#### Output
-
-- List item
-- Another item
-- And another item
-
-### Nested list
-
-#### Syntax
-
-```markdown
-- Fruit
-  - Apple
-  - Orange
-  - Banana
-- Dairy
-  - Milk
-  - Cheese
-```
-
-#### Output
-
-- Fruit
-  - Apple
-  - Orange
-  - Banana
-- Dairy
-  - Milk
-  - Cheese
-
-## Other Elements — abbr, sub, sup, kbd, mark
-
-### Syntax
-
-```markdown
-<abbr title="Graphics Interchange Format">GIF</abbr> is a bitmap image format.
-
-H<sub>2</sub>O
-
-X<sup>n</sup> + Y<sup>n</sup> = Z<sup>n</sup>
-
-Press <kbd>CTRL</kbd> + <kbd>ALT</kbd> + <kbd>Delete</kbd> to end the session.
-
-Most <mark>salamanders</mark> are nocturnal, and hunt for insects, worms, and other small creatures.
-```
-
-### Output
-
-<abbr title="Graphics Interchange Format">GIF</abbr> is a bitmap image format.
-
-H<sub>2</sub>O
-
-X<sup>n</sup> + Y<sup>n</sup> = Z<sup>n</sup>
-
-Press <kbd>CTRL</kbd> + <kbd>ALT</kbd> + <kbd>Delete</kbd> to end the session.
-
-Most <mark>salamanders</mark> are nocturnal, and hunt for insects, worms, and other small creatures.
+[^note]: 这是本页的脚注示例；点击脚注编号可以跳到这里，再通过返回链接回到正文。
