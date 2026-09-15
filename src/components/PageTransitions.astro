@@ -7,11 +7,20 @@ import { ClientRouter } from 'astro:transitions';
 <script is:inline>
   // Hide only when JavaScript is available; recover if the animation bundle fails to load.
   document.documentElement.dataset.pageMotion = 'pending';
-  window.setTimeout(() => {
-    if (document.documentElement.dataset.pageMotion === 'pending') {
-      document.documentElement.dataset.pageMotion = 'idle';
-    }
-  }, 2500);
+  // Module scripts finish before DOMContentLoaded. Their download time should
+  // not trigger recovery before the animation has had a chance to initialize.
+  document.addEventListener(
+    'DOMContentLoaded',
+    () => {
+      window.setTimeout(() => {
+        if (document.documentElement.dataset.pageMotion === 'pending') {
+          document.documentElement.dataset.pageMotion = 'idle';
+          document.dispatchEvent(new Event('site:motion-complete'));
+        }
+      }, 2500);
+    },
+    { once: true },
+  );
 </script>
 
 <script>

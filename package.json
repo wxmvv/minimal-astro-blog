@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "test:browser": "playwright test",
     "format": "prettier . --write",
     "format:check": "prettier . --check"
   },
@@ -39,6 +40,7 @@
     "esbuild": true
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "prettier": "3.9.6",
     "prettier-plugin-astro": "0.14.1"
   }

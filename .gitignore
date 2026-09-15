@@ -25,4 +25,6 @@ pnpm-debug.log*
 .pnpm-store
 .vscode/
 .playwright-mcp
+test-results/
+playwright-report/
 TODO.md

@@ -276,7 +276,22 @@ document.addEventListener('astro:after-swap', () => {
   prepare();
   moveIndicator();
 });
-document.addEventListener('astro:page-load', enter);
+// Astro's first page-load waits for window.load, including preview media.
+// Start when the DOM is ready and ignore the later event for that same root.
+// Swapped pages have a new root and still enter through astro:page-load.
+let enteredRoot: HTMLElement | null = null;
+function enterPage() {
+  const root = getRoot();
+  if (!root || root === enteredRoot) return;
+  enteredRoot = root;
+  enter();
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', enterPage, { once: true });
+} else {
+  enterPage();
+}
+document.addEventListener('astro:page-load', enterPage);
 
 reducedMotion.addEventListener('change', () => {
   if (!reducedMotion.matches) return;
