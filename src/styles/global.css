@@ -47,7 +47,7 @@
 }
 
 body {
-  @apply bg-white text-black dark:bg-gray-950 dark:text-white;
+  @apply bg-white text-black dark:bg-black dark:text-white;
   @apply m-0 p-0;
   @apply text-global-base;
   @apply md:flex md:flex-row md:justify-center;
