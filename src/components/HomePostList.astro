@@ -447,6 +447,8 @@ const previews = await Promise.all(
   }
 
   .hover-glass {
+    /*--border-highlight-rgb: 82 82 91;*/
+    --border-highlight-rgb: 255 255 255;
     position: relative;
     width: 100%;
     height: 100%;
@@ -461,8 +463,8 @@ const previews = await Promise.all(
     padding: 1px;
     background: radial-gradient(
       100px circle at var(--border-x, 50%) var(--border-y, 50%),
-      rgb(255 255 255 / 95%),
-      rgb(255 255 255 / 45%) 35%,
+      rgb(var(--border-highlight-rgb) / 95%),
+      rgb(var(--border-highlight-rgb) / 45%) 35%,
       transparent 60%
     );
     -webkit-mask:
@@ -480,6 +482,12 @@ const previews = await Promise.all(
   .hover-glass.is-pointer-hovered::after {
     /* 边缘光亮度 */
     opacity: 0.6;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .hover-glass {
+      --border-highlight-rgb: 255 255 255;
+    }
   }
 
   .previews {
