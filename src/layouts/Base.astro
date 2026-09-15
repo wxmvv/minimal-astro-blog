@@ -15,7 +15,7 @@ const { meta = {}, motionProfile = 'stagger' } = Astro.props;
 import AudioPlayer from '@/components/AudioPlayer/AudioPlayer.astro';
 
 // Resolve config-relative assets through Vite so nested pages and builds use the same URLs.
-const assets = import.meta.glob<string>('/data/assets/audio/**/*', {
+const assets = import.meta.glob<string>('/data/assets/**/*.{mp3,wav,ogg,m4a,aac,flac,opus,webm}', {
   eager: true,
   query: '?url',
   import: 'default',
