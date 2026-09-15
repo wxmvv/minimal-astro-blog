@@ -1,0 +1,134 @@
+<rive-music-button playing="false">
+  <button
+    class="toggle"
+    data-toggle
+    aria-expanded="false"
+    aria-controls="music-panel"
+    aria-label="Toggle music player"
+  >
+    <canvas data-rive width="160" height="160" aria-hidden="true"></canvas>
+    <span class="rive-fallback" aria-hidden="true"> ♫ </span>
+  </button>
+</rive-music-button>
+
+<script>
+  import { Rive, RuntimeLoader } from '@rive-app/canvas';
+  import wasmUrl from '@rive-app/canvas/rive.wasm?url';
+  import lightAnimation from './assets/music_light.riv?url';
+  import darkAnimation from './assets/music_dark.riv?url';
+
+  RuntimeLoader.setWasmUrl(wasmUrl);
+
+  class RiveMusicButton extends HTMLElement {
+    private animation?: Rive;
+    private disposeAnimation?: () => void;
+    private syncAnimation?: () => void;
+    static observedAttributes = ['playing'];
+
+    attributeChangedCallback() {
+      this.syncAnimation?.();
+    }
+
+    connectedCallback() {
+      if (this.disposeAnimation) return;
+      const get = <T extends HTMLElement>(selector: string) => this.querySelector<T>(selector)!;
+      const theme = matchMedia('(prefers-color-scheme: dark)');
+      const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+      this.syncAnimation = () => {
+        const input = this.animation
+          ?.stateMachineInputs('sm')
+          ?.find((input) => input.name === 'play');
+        if (input) input.value = this.getAttribute('playing') === 'true';
+        if (reducedMotion.matches) this.animation?.pause();
+        else this.animation?.play('sm');
+      };
+      const loadAnimation = () => {
+        this.animation?.cleanup();
+        this.classList.remove('rive-ready');
+        this.animation = new Rive({
+          src: theme.matches ? darkAnimation : lightAnimation,
+          canvas: get<HTMLCanvasElement>('[data-rive]'),
+          stateMachines: 'sm',
+          autoplay: true,
+          onLoad: () => {
+            this.animation?.resizeDrawingSurfaceToCanvas();
+            this.classList.add('rive-ready');
+            this.syncAnimation?.();
+          },
+          onLoadError: () => this.classList.remove('rive-ready'),
+        });
+      };
+      const resize = new ResizeObserver(() => this.animation?.resizeDrawingSurfaceToCanvas());
+      resize.observe(get('[data-rive]'));
+      theme.addEventListener('change', loadAnimation);
+      const motionChanged = () => this.syncAnimation?.();
+      reducedMotion.addEventListener('change', motionChanged);
+      this.disposeAnimation = () => {
+        resize.disconnect();
+        theme.removeEventListener('change', loadAnimation);
+        reducedMotion.removeEventListener('change', motionChanged);
+        this.animation?.cleanup();
+      };
+      loadAnimation();
+    }
+
+    disconnectedCallback() {
+      // Preserve the runtime when Astro moves the persisted player between pages.
+      queueMicrotask(() => {
+        if (this.isConnected) return;
+        this.disposeAnimation?.();
+        this.disposeAnimation = undefined;
+        this.syncAnimation = undefined;
+        this.animation = undefined;
+      });
+    }
+  }
+  if (!customElements.get('rive-music-button')) {
+    customElements.define('rive-music-button', RiveMusicButton);
+  }
+</script>
+
+<style>
+  rive-music-button {
+    display: block;
+  }
+  button {
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    border: 0;
+    background: none;
+  }
+  button:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+  .toggle {
+    position: relative;
+    display: block;
+    margin-left: auto;
+    width: 80px;
+    height: 80px;
+    padding: 0;
+    border-radius: 12px;
+  }
+  .toggle:hover {
+    background: transparent;
+  }
+  canvas {
+    display: block;
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+  }
+  .rive-fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 28px;
+  }
+  rive-music-button.rive-ready .rive-fallback {
+    display: none;
+  }
+</style>

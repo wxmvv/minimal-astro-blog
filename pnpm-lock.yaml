@@ -23,6 +23,9 @@ importers:
       '@expressive-code/plugin-line-numbers':
         specifier: ^0.44.2
         version: 0.44.2
+      '@rive-app/canvas':
+        specifier: ^2.42.1
+        version: 2.42.1
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
@@ -1096,6 +1099,9 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  '@rive-app/canvas@2.42.1':
+    resolution: {integrity: sha512-S9u3DNWWTmACjlq5vW0KmG6IpMRVx+JNExdJskAhMulEP7rC64LPufQf6vCuL9g1ogbrgT828vFEyraRVJn8fA==}
 
   '@rolldown/binding-android-arm-eabi@1.2.5':
     resolution: {integrity: sha512-DLe/i+l8ynIBY7XEQ191TeZvCoowIGa18R+dIV30GW7DiOtp74i/xX8hs8GUjW5ARV7VZuie3d6AumSmCwbeRA==}
@@ -3884,6 +3890,8 @@ snapshots:
       react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@rive-app/canvas@2.42.1': {}
 
   '@rolldown/binding-android-arm-eabi@1.2.5':
     optional: true

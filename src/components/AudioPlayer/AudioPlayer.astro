@@ -1,0 +1,423 @@
+---
+import RiveButton from './RiveButton.astro';
+import type { Track } from './types';
+import PlayIcon from './assets/icons/play.svg';
+import PauseIcon from './assets/icons/pause.svg';
+import SkipIcon from './assets/icons/skip.svg';
+import LoopIcon from './assets/icons/loop-all.svg';
+import ShuffleIcon from './assets/icons/order-random.svg';
+
+interface Props {
+  trackList: readonly Track[];
+  autoPlay?: boolean;
+}
+const { trackList: tracks, autoPlay = false } = Astro.props;
+---
+
+{
+  tracks.length > 0 && (
+    <music-player
+      transition:persist="music-player"
+      data-tracks={JSON.stringify(tracks)}
+      data-auto-play={String(autoPlay)}
+    >
+      <section id="music-panel" aria-label="music player" hidden>
+        <header>
+          <>
+            <span>Music</span>
+            <button data-close aria-label="collapse player">
+              ×
+            </button>
+          </>
+        </header>
+        <p class="track-title" data-title>
+          choose a song
+        </p>
+        <p class="tags" data-tags />
+        <audio preload="none" />
+        <input
+          data-seek
+          type="range"
+          min="0"
+          max="0"
+          value="0"
+          step="0.1"
+          aria-label="progress bar"
+          disabled
+        />
+        <div class="time">
+          <>
+            <span data-time>0:00</span>
+            <span data-duration>0:00</span>
+          </>
+        </div>
+        <div class="controls">
+          <button data-loop aria-label="single loop" aria-pressed="false" title="single loop">
+            <LoopIcon aria-hidden="true" />
+          </button>
+          <button data-prev aria-label="previous" title="previous">
+            <SkipIcon aria-hidden="true" />
+          </button>
+          <button data-play class="play" aria-label="play" title="play">
+            <>
+              <span data-play-icon>
+                <PlayIcon aria-hidden="true" />
+              </span>
+              <span data-pause-icon hidden>
+                <PauseIcon aria-hidden="true" />
+              </span>
+            </>
+          </button>
+          <button data-next aria-label="next" title="next">
+            <SkipIcon class="next-icon" aria-hidden="true" />
+          </button>
+          <button data-shuffle aria-label="random" aria-pressed="false" title="random">
+            <ShuffleIcon aria-hidden="true" />
+          </button>
+        </div>
+        <label class="volume">
+          Volume
+          <input data-volume type="range" min="0" max="1" value="0.8" step="0.01" />
+        </label>
+        <p class="error" data-error role="status" />
+        <ol aria-label="playlist">
+          {tracks.map((track, index) => (
+            <li>
+              <button data-track={index} disabled={!track.src} aria-current="false">
+                <span class="number">{String(index + 1).padStart(2, '0')}</span>
+                <span>
+                  {track.title}
+                  {!track.src && <small> (coming soon) </small>}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ol>
+      </section>
+      <RiveButton />
+    </music-player>
+  )
+}
+
+<script>
+  import type { Track } from './types';
+
+  class MusicPlayer extends HTMLElement {
+    disconnectedCallback() {
+      // Astro temporarily detaches persisted elements during a route swap.
+      queueMicrotask(() => {
+        if (this.isConnected) return;
+        this.querySelector('audio')?.pause();
+        delete this.dataset.ready;
+      });
+    }
+
+    connectedCallback() {
+      if (this.dataset.ready) return;
+      this.dataset.ready = 'true';
+      const tracks: Track[] = JSON.parse(this.dataset.tracks ?? '[]');
+      const get = <T extends HTMLElement>(selector: string) => this.querySelector<T>(selector)!;
+      const audio = get<HTMLAudioElement>('audio');
+      const panel = get<HTMLElement>('section');
+      const toggle = get<HTMLButtonElement>('[data-toggle]');
+      const play = get<HTMLButtonElement>('[data-play]');
+      const seek = get<HTMLInputElement>('[data-seek]');
+      const error = get<HTMLElement>('[data-error]');
+      const available = tracks.flatMap((track, i) => (track.src ? [i] : []));
+      let current = available[0] ?? -1;
+      let shuffle = false;
+      let request = 0;
+      const format = (seconds: number) => {
+        const time = Number.isFinite(seconds) ? Math.floor(seconds) : 0;
+        return `${Math.floor(time / 60)}:${String(time % 60).padStart(2, '0')}`;
+      };
+      const expand = (open: boolean) => {
+        panel.hidden = !open;
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? '收起音乐播放器' : '打开音乐播放器');
+      };
+      toggle.onclick = () => expand(Boolean(panel.hidden));
+      get<HTMLButtonElement>('[data-close]').onclick = () => {
+        expand(false);
+        toggle.focus();
+      };
+      this.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          expand(false);
+          toggle.focus();
+        }
+      });
+      const update = () => {
+        const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+        seek.max = String(duration);
+        seek.value = String(audio.currentTime);
+        seek.disabled = !duration;
+        get('[data-time]').textContent = format(audio.currentTime);
+        get('[data-duration]').textContent = format(duration);
+      };
+      const start = async () => {
+        if (current < 0) return;
+        const id = ++request;
+        error.textContent = '';
+        try {
+          await audio.play();
+        } catch (reason) {
+          if (id !== request || (reason instanceof DOMException && reason.name === 'AbortError'))
+            return;
+          error.textContent =
+            reason instanceof DOMException && reason.name === 'NotAllowedError'
+              ? '浏览器阻止了自动播放，请点击播放按钮。'
+              : '无法播放这首音乐，请重试或选择其他歌曲。';
+        }
+      };
+      const select = (index: number, autoplay = true) => {
+        if (!tracks[index]?.src) return;
+        ++request;
+        audio.pause();
+        current = index;
+        audio.src = tracks[index].src;
+        error.textContent = '';
+        get('[data-title]').textContent = tracks[index].title;
+        get('[data-tags]').textContent = tracks[index].tags.join(' · ');
+        this.querySelectorAll<HTMLButtonElement>('[data-track]').forEach((button) => {
+          button.setAttribute('aria-current', String(Number(button.dataset.track) === index));
+        });
+        update();
+        if (autoplay) void start();
+      };
+      const move = (direction: number) => {
+        if (!available.length) return;
+        const others = available.filter((index) => index !== current);
+        const next =
+          shuffle && others.length
+            ? others[Math.floor(Math.random() * others.length)]
+            : available[
+                (available.indexOf(current) + direction + available.length) % available.length
+              ];
+        select(next);
+      };
+      play.onclick = () => {
+        if (audio.paused) void start();
+        else {
+          ++request;
+          audio.pause();
+        }
+      };
+      get<HTMLButtonElement>('[data-prev]').onclick = () => move(-1);
+      get<HTMLButtonElement>('[data-next]').onclick = () => move(1);
+      get<HTMLButtonElement>('[data-loop]').onclick = (event) => {
+        audio.loop = !audio.loop;
+        (event.currentTarget as HTMLButtonElement).setAttribute('aria-pressed', String(audio.loop));
+      };
+      get<HTMLButtonElement>('[data-shuffle]').onclick = (event) => {
+        shuffle = !shuffle;
+        (event.currentTarget as HTMLButtonElement).setAttribute('aria-pressed', String(shuffle));
+      };
+      this.querySelectorAll<HTMLButtonElement>('[data-track]').forEach((button) => {
+        button.onclick = () => select(Number(button.dataset.track));
+      });
+      seek.oninput = () => {
+        if (Number.isFinite(audio.duration)) audio.currentTime = Number(seek.value);
+      };
+      audio.volume = 0.8;
+      get<HTMLInputElement>('[data-volume]').oninput = (event) => {
+        audio.volume = Number((event.currentTarget as HTMLInputElement).value);
+      };
+      const playing = () => {
+        const active = !audio.paused && !audio.ended;
+        this.classList.toggle('playing', active);
+        get('[data-play-icon]').hidden = active;
+        get('[data-pause-icon]').hidden = !active;
+        get('rive-music-button').setAttribute('playing', String(active));
+        play.setAttribute('aria-label', active ? '暂停' : '播放');
+        play.title = active ? '暂停' : '播放';
+      };
+      audio.addEventListener('play', playing);
+      audio.addEventListener('pause', playing);
+      audio.addEventListener('timeupdate', update);
+      audio.addEventListener('loadedmetadata', update);
+      audio.addEventListener('durationchange', update);
+      audio.addEventListener('ended', () => move(1));
+      audio.addEventListener('error', () => {
+        playing();
+        error.textContent = '音频加载失败，请重试或选择其他歌曲。';
+      });
+      if (current >= 0) select(current, this.dataset.autoPlay === 'true');
+      else {
+        error.textContent = '暂无可播放的音乐。';
+        this.querySelectorAll<HTMLButtonElement>('.controls button').forEach(
+          (button) => (button.disabled = true),
+        );
+      }
+    }
+  }
+  if (!customElements.get('music-player')) customElements.define('music-player', MusicPlayer);
+</script>
+
+<style>
+  music-player {
+    position: fixed;
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    z-index: 40;
+    font-size: 13px;
+    --surface: #fff;
+    --muted: #71717a;
+    --line: #e4e4e7;
+    --hover: #f4f4f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    music-player {
+      --surface: #111827;
+      --muted: #a1a1aa;
+      --line: #374151;
+      --hover: #1f2937;
+    }
+  }
+  section {
+    width: min(320px, calc(100vw - 2rem));
+    max-height: calc(100dvh - 6rem);
+    overflow-y: auto;
+    padding: 18px;
+    margin-bottom: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px #00000014;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  button {
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    border: 0;
+    background: none;
+  }
+  button:disabled {
+    cursor: default;
+    opacity: 0.4;
+  }
+  button:focus-visible,
+  input:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--muted);
+  }
+  header button {
+    font-size: 22px;
+    width: 32px;
+    height: 32px;
+  }
+  .track-title {
+    font-weight: 600;
+    margin: 12px 0 4px;
+    line-height: 1.5;
+  }
+  .tags {
+    color: var(--muted);
+    font-size: 11px;
+    margin: 0 0 16px;
+  }
+  input[type='range'] {
+    width: 100%;
+    accent-color: currentColor;
+    height: 18px;
+    cursor: pointer;
+  }
+  .time {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font:
+      11px ui-monospace,
+      monospace;
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 14px 0;
+  }
+  .controls button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 20px;
+  }
+  button:hover:not(:disabled),
+  button[aria-pressed='true'] {
+    background: var(--hover);
+  }
+  button[aria-pressed='true'] {
+    box-shadow: inset 0 0 0 1px currentColor;
+  }
+  .controls .play {
+    background: var(--hover);
+    width: 46px;
+    height: 46px;
+  }
+  .volume {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--muted);
+    white-space: nowrap;
+    font-size: 11px;
+  }
+  .error {
+    font-size: 12px;
+    margin: 8px 0;
+  }
+  .error:empty {
+    display: none;
+  }
+  ol {
+    padding: 12px 0 0;
+    margin: 14px 0 0;
+    border-top: 1px solid var(--line);
+    list-style: none;
+  }
+  li button {
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+    width: 100%;
+    text-align: left;
+    padding: 10px 6px;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  li button[aria-current='true'] {
+    background: var(--hover);
+    font-weight: 600;
+  }
+  .number {
+    color: var(--muted);
+    font:
+      10px ui-monospace,
+      monospace;
+  }
+  small {
+    display: block;
+    font-weight: normal;
+  }
+  .controls button {
+    display: grid;
+    place-items: center;
+  }
+  .controls :global(svg) {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+  }
+  .controls :global(.next-icon) {
+    transform: rotate(180deg);
+  }
+</style>

@@ -54,23 +54,23 @@ export const siteMetadata = {
       placeholder: 'Search…',
     },
   },
-  trackList: [
-    {
-      url: '../assets/bg_audio/Nujabes - Beat laments the world.mp3',
-      title: 'Nujabes - Beat laments the world',
-      tags: ['Metaphorical Music', 'Nujabes'],
-    },
-    {
-      url: '../assets/bg_audio/Nujabes - Letter from Yokosuka.mp3',
-      title: 'Nujabes - Letter from Yokosuka',
-      tags: ['Metaphorical Music', 'Nujabes'],
-    },
-    {
-      url: '../assets/bg_audio/Nujabes - The Final View.mp3',
-      title: 'Nujabes - The Final View',
-      tags: ['Metaphorical Music', 'Nujabes'],
-    },
-  ],
+
+  audioPlayer: {
+    hidden: false,
+    autoPlay: false,
+    trackList: [
+      {
+        url: '../assets/audio/Nujabes - Beat laments the world.mp3',
+        title: 'Nujabes - Beat laments the world',
+        tags: ['Metaphorical Music', 'Nujabes'],
+      },
+      {
+        url: '../assets/audio/Nujabes - Letter from Yokosuka.mp3',
+        title: 'Nujabes - Letter from Yokosuka',
+        tags: ['Metaphorical Music', 'Nujabes'],
+      },
+    ],
+  },
 } as const;
 
 export const pageMetadata = {

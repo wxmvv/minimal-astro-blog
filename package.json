@@ -19,6 +19,7 @@
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.3",
     "@expressive-code/plugin-line-numbers": "^0.44.2",
+    "@rive-app/canvas": "^2.42.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",

@@ -16,11 +16,13 @@ const description = meta.description ?? siteMetadata.description;
 // const image = meta.image ?? FallbackImage;
 const image = meta.image;
 const imageURL = image ? new URL(image, siteURL) : undefined;
-const umami = siteMetadata.analytics.umamiAnalytics;
+const analytics: { umamiAnalytics?: { umamiWebsiteId: string; src: string } } =
+  siteMetadata.analytics;
+const umami = analytics.umamiAnalytics;
 ---
 
 {
-  import.meta.env.PROD && umami.umamiWebsiteId && (
+  import.meta.env.PROD && umami?.umamiWebsiteId && (
     <script is:inline defer src={umami.src} data-website-id={umami.umamiWebsiteId} />
   )
 }
