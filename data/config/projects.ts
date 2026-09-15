@@ -2,8 +2,8 @@ export interface Project {
   title: string;
   description: string;
   href?: string;
-  /** HTTP(S) URL or local image path relative to this file, e.g. '../assets/google.png'. */
-  image?: string;
+  /** Single image or a light/dark pair, like homepageMedia. Each path is an HTTP(S) URL or relative to this file. */
+  image?: string | { light: string; dark: string };
   tag?: string;
   year?: string;
 }
