@@ -233,9 +233,29 @@ const previews = await Promise.all(
         previewLayer.style.transform = `translateY(${y}px)`;
       };
 
+      // Prepare the displacement map early, but show both backdrop-filter layers
+      // only at full opacity. The cover also filters the backdrop with blur(0px).
+      const syncBackdropLayers = () => {
+        background.classList.toggle(
+          'is-backdrop-ready',
+          active !== null &&
+            background.classList.contains('is-active') &&
+            !isTrackingMotion() &&
+            getComputedStyle(background).opacity === '1',
+        );
+      };
+      background.addEventListener(
+        'transitionend',
+        (event) => {
+          if (event.target === background && event.propertyName === 'opacity') syncBackdropLayers();
+        },
+        { signal },
+      );
+
       const measureBackground = () => {
         syncEntryMotion();
         background.classList.toggle('is-tracking-motion', isTrackingMotion());
+        syncBackdropLayers();
         if (!active) return;
         // The link's ancestor moves during entry; its content has a separate pointer offset.
         const bounds = this.getBoundingClientRect();
@@ -277,6 +297,7 @@ const previews = await Promise.all(
         this.dataset.activeIndex = link.dataset.postIndex;
         measure();
         background.classList.add('is-active');
+        syncBackdropLayers();
       };
 
       const hide = () => {
@@ -286,7 +307,7 @@ const previews = await Promise.all(
         active = null;
         glass.classList.remove('is-pointer-hovered');
         delete this.dataset.activeIndex;
-        background.classList.remove('is-active');
+        background.classList.remove('is-backdrop-ready', 'is-active');
         moveOffset();
         syncPreviews();
       };
@@ -375,6 +396,7 @@ const previews = await Promise.all(
         () => {
           moveOffset();
           syncPreviews();
+          syncBackdropLayers();
         },
         { signal },
       );
@@ -446,6 +468,16 @@ const previews = await Promise.all(
     transition-property: opacity;
   }
 
+  .hover-background :global(.liquid-glass3-outer),
+  .hover-background :global(.liquid-glass3-cover) {
+    visibility: hidden;
+  }
+
+  .hover-background.is-backdrop-ready :global(.liquid-glass3-outer),
+  .hover-background.is-backdrop-ready :global(.liquid-glass3-cover) {
+    visibility: visible;
+  }
+
   .hover-glass {
     /*--border-highlight-rgb: 82 82 91;*/
     --border-highlight-rgb: 255 255 255;
@@ -495,7 +527,7 @@ const previews = await Promise.all(
     z-index: -1;
     top: 50%;
     /*left: var(--preview-left, 50%);*/
-    left: 55%;
+    left: 30%;
     width: var(--preview-width, 0px);
     pointer-events: none;
   }
