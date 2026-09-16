@@ -21,6 +21,9 @@ const analytics: { umamiAnalytics?: { umamiWebsiteId: string; src: string } } =
 const umami = analytics.umamiAnalytics;
 ---
 
+<!-- Native light/dark themes already cover this site. Avoid rewriting glass SVG filters. -->
+<meta name="darkreader-lock" />
+
 {
   import.meta.env.PROD && umami?.umamiWebsiteId && (
     <script is:inline defer src={umami.src} data-website-id={umami.umamiWebsiteId} />
