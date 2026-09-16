@@ -48,10 +48,10 @@ const projectImages = await Promise.all(
         projects.map((project, index) => {
           const image = projectImages[index];
           return (
-            <li class="section-g2" data-motion-item>
+            <li class="section-g2 min-w-0" data-motion-item>
               {image && (
-                <div class="flex flex-row justify-center bg-zinc-100 dark:bg-zinc-950 rounded-sm aspect-square overflow-hidden">
-                  <picture style="display: contents">
+                <div class="flex min-w-0 flex-row justify-center bg-zinc-100 dark:bg-zinc-950 rounded-sm aspect-square overflow-hidden">
+                  <picture class="block w-full min-w-0">
                     {image.dark && (
                       <source
                         media="(prefers-color-scheme: dark)"
@@ -72,7 +72,7 @@ const projectImages = await Promise.all(
                       <Image
                         src={image.light}
                         alt={project.title}
-                        class="object-cover w-full h-full"
+                        class="object-cover"
                         loading="lazy"
                       />
                     )}
