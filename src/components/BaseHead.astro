@@ -24,6 +24,20 @@ const umami = analytics.umamiAnalytics;
 <!-- Native light/dark themes already cover this site. Avoid rewriting glass SVG filters. -->
 <meta name="darkreader-lock" />
 
+<script>
+  // Dark Reader's early fallback injector does not check darkreader-lock.
+  // Remove only that fallback if it is left behind or reinserted on theme changes.
+  const removeDarkReaderFallback = () => {
+    if (!document.head.querySelector('meta[name="darkreader-lock"]')) return;
+    document.querySelectorAll('style.darkreader--fallback').forEach((style) => style.remove());
+  };
+  const fallbackObserver = new MutationObserver(removeDarkReaderFallback);
+  // The extension can initially append its fallback to <html>, then move it to <head>.
+  fallbackObserver.observe(document.documentElement, { childList: true });
+  fallbackObserver.observe(document.head, { childList: true, subtree: true });
+  removeDarkReaderFallback();
+</script>
+
 {
   import.meta.env.PROD && umami?.umamiWebsiteId && (
     <script is:inline defer src={umami.src} data-website-id={umami.umamiWebsiteId} />
