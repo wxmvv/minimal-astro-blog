@@ -50,8 +50,8 @@ const projectImages = await Promise.all(
           return (
             <li class="section-g2 min-w-0" data-motion-item>
               {image && (
-                <div class="flex min-w-0 flex-row justify-center bg-zinc-100 dark:bg-zinc-950 rounded-sm aspect-square overflow-hidden">
-                  <picture class="block w-full min-w-0">
+                <div class="flex min-w-0 flex-row justify-center bg-zinc-100 dark:bg-zinc-950 border-zinc-100 dark:border-zinc-950 rounded-sm aspect-square overflow-hidden">
+                  <picture class="flex">
                     {image.dark && (
                       <source
                         media="(prefers-color-scheme: dark)"
