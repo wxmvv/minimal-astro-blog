@@ -105,11 +105,14 @@ pre > code {
 }
 
 blockquote {
-  border-left: 4px solid var(--accent);
+  @apply text-gray-900 dark:text-gray-100;
+  /* 圆角 */
+  border-left: 3px solid rgb(var(--gray-light));
   padding: 0 0 0 20px;
   margin: 0;
-  font-size: 1.333em;
+  font-style: italic;
 }
+
 hr {
   border: none;
   border-top: 1px solid rgb(var(--gray-light));
